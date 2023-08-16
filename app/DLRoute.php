@@ -1,5 +1,4 @@
 <?php
-
 namespace DLRoute;
 use DLRoute\Interfaces\RouteInterface;
 
