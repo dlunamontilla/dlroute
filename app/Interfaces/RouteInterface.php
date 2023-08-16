@@ -2,7 +2,7 @@
 
 namespace DLRoute\Interfaces;
 
-interface IRoute {
+interface RouteInterface {
 
     /**
      * Define una ruta para manejar solicitudes HTTP GET.

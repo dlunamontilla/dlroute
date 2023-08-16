@@ -1,7 +1,7 @@
 <?php
 
 namespace DLRoute;
-use DLRoute\Interfaces\IRoute;
+use DLRoute\Interfaces\RouteInterface;
 
 /**
  * Define el sistema de enrutamiento del sistema.
@@ -14,7 +14,7 @@ use DLRoute\Interfaces\IRoute;
  * @license MIT
  * 
  */
-class DLRoute implements IRoute {
+class DLRoute implements RouteInterface {
     private static ?self $instance = null;
 
     public function __construct() {}

@@ -12,7 +12,7 @@ namespace DLRoute\Interfaces;
  * @copyright 2023 David E Luna M
  * @license MIT
  */
-interface IServer {
+interface ServerInterface {
 
     /**
      * Devuelve la URI de la aplicación.
