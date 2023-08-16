@@ -1,0 +1,19 @@
+{
+    "name": "dlunamontilla/dlroute",
+    "description": "Sistema de enrutamiento para usar en DLUnire o cualquier otro proyecto.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "DLRoute": "app/"
+        }
+    },
+    "authors": [
+        {
+            "name": "David E Luna M",
+            "email": "davidlunamontilla@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}
