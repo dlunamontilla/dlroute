@@ -27,26 +27,26 @@ Para comenzar a utilizar `DLRoute`, sigue estos pasos:
 
 Método GET:
 
-```GET
-public static function get(string $uri, callable|array|string $controller): void;
+```php
+DLRoute::get(string $uri, callable|array|string $controller): void;
 ```
 
 Método POST:
 
 ```php
-public static function post(string $uri, callable|array|string $controller): void;
+DLRoute::post(string $uri, callable|array|string $controller): void;
 ```
 
 Método PUT:
 
 ```php
-public static function put(string $uri, callable|array|string $controller): void;
+DLRoute::put(string $uri, callable|array|string $controller): void;
 ```
 
 Método DELETE:
 
 ```php
-public static function delete(string $uri, callable|array|string $controller): void;
+DLRoute::delete(string $uri, callable|array|string $controller): void;
 ```
 
 ### Ejemplos
