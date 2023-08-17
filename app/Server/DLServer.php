@@ -56,9 +56,13 @@ class DLServer implements ServerInterface {
     }
 
     public static function get_ipaddress(): string {
-        # Pendiente por definir lógica para capturar direcciones IP
+        $ip = "";
 
-        return "";
+        if (array_key_exists('REMOTE_ADDR', $_SERVER)) {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+
+        return trim($ip);
     }
 
     public static function get_user_agent(): string {
@@ -68,7 +72,19 @@ class DLServer implements ServerInterface {
             $user_agent = $_SERVER['HTTP_USER_AGENT'];
         }
 
+        print_r($_SERVER);
+
         return $user_agent;
+    }
+
+    public static function get_document_root(): string {
+        $document_root = "";
+
+        if (array_key_exists('DOCUMENT_ROOT', $_SERVER)) {
+            $document_root = $_SERVER['DOCUMENT_ROOT'];
+        }
+
+        return trim($document_root);
     }
 
     public static function is_post(): bool {

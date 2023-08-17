@@ -57,6 +57,13 @@ interface ServerInterface {
     public static function get_user_agent(): string;
 
     /**
+     * Devuelve el documento raíz de ejecución de la aplicación
+     *
+     * @return string
+     */
+    public static function get_document_root(): string;
+
+    /**
      * Determina si el método de envío HTTP es GET.
      *
      * @return boolean
