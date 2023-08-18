@@ -7,37 +7,26 @@ use DLRoute\Server\DLServer;
 
 include dirname(__DIR__) . "/vendor/autoload.php";
 
+/**
+ * Obtención del nombre del método.
+ * 
+ * @var string
+ */
 $method = DLServer::get_method();
 
-if (DLServer::is_post()) {
-    echo "Petición hecha al método POST";
-}
-
-if (DLServer::is_get()) {
-    echo "Petición hecha al método GET";
-}
-
-if (DLServer::is_put()) {
-    echo "Petición de actualización";
-}
-
-if (DLServer::is_delete()) {
-    echo "Petición de eliminación";
-}
-
-
-DLRoute::get("/usr/science", function() {
-    echo "Esta es prueba usando el sistema de enrutamiento";
+DLRoute::get('/home', function() use ($method) {
+    echo $method;
 });
 
-DLRoute::post("/test/content", function() {
-
-    return "Esta es una prueba";
+DLRoute::post('/home', function() use ($method) {
+    echo $method;
 });
 
-echo "\n\n";
-print_r($_REQUEST);
-$data = file_get_contents("php://input");
+DLRoute::put('/home', function() use ($method) {
+    echo $method;
+});
 
-echo "\n\n\n";
-print_r(json_decode($data));
+DLRoute::delete('/home', function() use ($method) {
+    echo $method;
+});
+

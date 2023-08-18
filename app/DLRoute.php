@@ -41,6 +41,8 @@ class DLRoute implements RouteInterface {
         if (!DLServer::is_put()) {
             return;
         }
+
+        self::request($uri, $controller);
     }
 
     public static function delete(string $uri, callable|array|string $controller): void {
@@ -60,7 +62,9 @@ class DLRoute implements RouteInterface {
      * @return void
      */
     private static function request(string $uri, callable|array|string $controller): void {
+        # Realizar una prueba:
 
+        $controller();
     }
 
     private static function register_uri(string $uri): void {

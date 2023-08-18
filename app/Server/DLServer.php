@@ -82,6 +82,7 @@ class DLServer implements ServerInterface {
 
         if (array_key_exists('DOCUMENT_ROOT', $_SERVER)) {
             $document_root = $_SERVER['DOCUMENT_ROOT'];
+            $document_root = dirname($document_root);
         }
 
         return trim($document_root);
