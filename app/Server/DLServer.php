@@ -5,15 +5,6 @@ namespace DLRoute\Server;
 use DLRoute\Interfaces\ServerInterface;
 
 class DLServer implements ServerInterface {
-    /**
-     * Instancia de clase
-     *
-     * @var self|null
-     */
-    private static ?self $instance = null;
-
-    private function __construct() {
-    }
 
     public static function get_uri(): string {
         $uri = "";
@@ -104,16 +95,31 @@ class DLServer implements ServerInterface {
         return self::get_method() === "DELETE";
     }
 
-    /**
-     * Devuelve una instancia de clase
-     *
-     * @return self
-     */
-    public static function get_instance(): self {
-        if (!self::$instance) {
-            self::$instance = new self;
+    public static function get_http_host(): string {
+        $http_host = "";
+        $protocol = self::get_protocol();
+
+        if (array_key_exists('HTTP_HOST', $_SERVER)) {
+            $http_host = $_SERVER['HTTP_HOST'];
         }
 
-        return self::$instance;
+        return "{$protocol}{$http_host}";
+    }
+
+    /**
+     * Devuelve el protocolo HTTP que se está usando, es decir: `http` o `https`.
+     *
+     * @return string
+     */
+    private static function get_protocol(): string {
+        $is_https = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
+
+        $protocol = "http://";
+
+        if ($is_https) {
+            $protocol = "https://";
+        }
+
+        return $protocol;
     }
 }

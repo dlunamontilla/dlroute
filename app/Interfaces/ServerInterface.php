@@ -64,6 +64,14 @@ interface ServerInterface {
     public static function get_document_root(): string;
 
     /**
+     * Devuelve el hombre de host con puerto incluido en formato HTTP, es decir,
+     * de una forma similar a esta: `http://localhost:3000/`
+     *
+     * @return string
+     */
+    public static function get_http_host(): string;
+
+    /**
      * Determina si el método de envío HTTP es GET.
      *
      * @return boolean

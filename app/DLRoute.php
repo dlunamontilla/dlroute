@@ -62,9 +62,23 @@ class DLRoute implements RouteInterface {
      * @return void
      */
     private static function request(string $uri, callable|array|string $controller): void {
-        # Realizar una prueba:
+        # Por ahora, lo dejamos así para revisar la salida.
 
-        $controller();
+        /**
+         * @var array|string|int|float|boolean
+         */
+        $data = "";
+
+        if (is_array($controller)) {
+            $object = new $controller[0];
+            $data = $object->{$controller[1]};
+        }
+
+        if (is_callable($controller)) {
+            $data = $controller();
+        }
+
+        print_r($data);
     }
 
     private static function register_uri(string $uri): void {

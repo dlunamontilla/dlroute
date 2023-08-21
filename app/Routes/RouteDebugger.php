@@ -2,6 +2,7 @@
 
 namespace DLRoute\Routes;
 use DLRoute\Interfaces\DebuggerInterface;
+use DLRoute\Server\DLServer;
 
 /**
  * Depura las rutas introducidas por el usuario.
@@ -16,8 +17,45 @@ use DLRoute\Interfaces\DebuggerInterface;
 class RouteDebugger implements DebuggerInterface {
 
     public static function clear_route(string $route): string {
-        $route = preg_replace("/\+/", DIRECTORY_SEPARATOR, $route);
-        $route = preg_replace("/\+$/", '', $route);
-        return trim($route);
+        $route = self::delete_duplicate_slash($route);
+        return self::remove_trailing_slash($route);
+    }
+
+    public static function process_route(string $path): string {
+        $root = DLServer::get_document_root();
+        $dir = "{$root}/{$path}";
+
+        $dir = self::dot_to_slash($dir);
+        $dir = self::delete_duplicate_slash($dir);
+        $dir = self::remove_trailing_slash($dir);
+
+        return $dir;
+    }
+
+    /**
+     * Convierte los puntos en barras diagonales.
+     *
+     * @param string $path
+     * @return string
+     */
+    private static function dot_to_slash(string $path): string {
+        $path = preg_replace("/\.+/", DIRECTORY_SEPARATOR, $path);
+        return trim($path);
+    }
+
+    /**
+     * Elimina los duplicados de las barras diagionales (//).
+     *
+     * @param string $path
+     * @return string
+     */
+    private static function delete_duplicate_slash(string $path): string {
+        $path = preg_replace("/\/+/", DIRECTORY_SEPARATOR, $path);
+        return trim($path);
+    }
+
+    public static function remove_trailing_slash(string $path): string {
+        $path = preg_replace("/\/+$/", '', $path);
+        return trim($path);
     }
 }
