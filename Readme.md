@@ -74,3 +74,15 @@ DLRoute::get('/home', function(object|array $data) {
     # Lógica para la ruta definida.
 });
 ```
+
+## Otra cosa
+
+Tomar en cuenta en CSS:
+
+```css
+@property --rotate {
+  syntax: "<angle>";
+  initial-value: 132deg;
+  inherits: false;
+}
+```

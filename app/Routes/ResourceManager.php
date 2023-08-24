@@ -2,6 +2,7 @@
 
 namespace DLRoute\Routes;
 
+use DLRoute\Config\DLRealPath;
 use DLRoute\Interfaces\ResourceInterface;
 use DLRoute\Server\DLServer;
 
@@ -147,6 +148,20 @@ class ResourceManager implements ResourceInterface {
         $js_content = trim($js_content);
 
         if ($external) {
+            $realpath = DLRealPath::get_instance();
+
+            /**
+             * URI del directorio de trabajo.
+             * 
+             * @var string
+             */
+            $uri_from_workdir = $realpath->get_uri_from_workdir();
+
+            /**
+             * Ruta HTTP.
+             * 
+             * @var string
+             */
             $route = DLServer::get_http_host();
 
             # Eliminar la primera o primeras barrras diagionales (//) de `$path`
@@ -154,7 +169,10 @@ class ResourceManager implements ResourceInterface {
 
             $path = RouteDebugger::remove_trailing_slash($path);
             $path = self::exclude_first_part($path);
-
+            $path = "{$uri_from_workdir}/{$path}";
+            
+            $path = RouteDebugger::clear_route($path);
+            
             /**
              * Ruta al archivo JS a través del protocolo HTTP.
              * 

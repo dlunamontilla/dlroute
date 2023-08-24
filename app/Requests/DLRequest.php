@@ -34,7 +34,6 @@ class DLRequest implements RequestInterface {
 
     private DLOutput $output;
     private function __construct() {
-        $this->server = DLServer::get_instance();
         $this->output = DLOutput::get_instance();
     }
 

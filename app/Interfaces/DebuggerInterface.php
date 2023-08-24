@@ -40,4 +40,13 @@ interface DebuggerInterface {
      * @return string
      */
     public static function remove_trailing_slash(string $path): string;
+
+    /**
+     * Elimina las barras diagonales, al principio y final de una cadena
+     * de texto.
+     *
+     * @param string $path
+     * @return string
+     */
+    public static function trim_slash(string $path): string;
 }

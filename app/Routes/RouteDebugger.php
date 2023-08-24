@@ -18,7 +18,8 @@ class RouteDebugger implements DebuggerInterface {
 
     public static function clear_route(string $route): string {
         $route = self::delete_duplicate_slash($route);
-        return self::remove_trailing_slash($route);
+        $route = self::trim_slash($route);
+        return $route;
     }
 
     public static function process_route(string $path): string {
@@ -50,12 +51,21 @@ class RouteDebugger implements DebuggerInterface {
      * @return string
      */
     private static function delete_duplicate_slash(string $path): string {
-        $path = preg_replace("/\/+/", DIRECTORY_SEPARATOR, $path);
+        $path = preg_replace("/\/+/", '/', $path);
         return trim($path);
     }
 
     public static function remove_trailing_slash(string $path): string {
-        $path = preg_replace("/\/+$/", '', $path);
+        $path = rtrim($path);
+        $path = rtrim($path, '\/');
+
         return trim($path);
+    }
+
+    public static function trim_slash(string $path): string {
+        $path = trim($path);
+        $path = trim($path, '\/');
+
+        return $path;
     }
 }

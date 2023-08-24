@@ -2,6 +2,7 @@
 
 namespace DLRoute\Server;
 
+use DLRoute\Config\DLRealPath;
 use DLRoute\Interfaces\ServerInterface;
 
 class DLServer implements ServerInterface {
@@ -69,14 +70,8 @@ class DLServer implements ServerInterface {
     }
 
     public static function get_document_root(): string {
-        $document_root = "";
-
-        if (array_key_exists('DOCUMENT_ROOT', $_SERVER)) {
-            $document_root = $_SERVER['DOCUMENT_ROOT'];
-            $document_root = dirname($document_root);
-        }
-
-        return trim($document_root);
+        $realpath = DLRealPath::get_instance();
+        return trim($realpath->get_document_root());
     }
 
     public static function is_post(): bool {
