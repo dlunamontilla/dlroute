@@ -3,6 +3,7 @@
 namespace DLRoute\Routes;
 
 use DLRoute\Config\DLRealPath;
+use DLRoute\Config\FileInfo;
 use DLRoute\Interfaces\ResourceInterface;
 use DLRoute\Server\DLServer;
 
@@ -14,6 +15,8 @@ class ResourceManager implements ResourceInterface {
     public static function css(string $path, ?bool $external = false): string {
         # Elimina la extensión del archivo.
         $path = self::delete_extension($path);
+
+        $path = RouteDebugger::dot_to_slash($path);
 
         /**
          * Ruta completa del archivo sin la extensión.
@@ -53,15 +56,31 @@ class ResourceManager implements ResourceInterface {
             return "<style>{$css_content}</style>";
         }
 
+        $realpath = DLRealPath::get_instance();
+
+        /**
+         * URI del directorio de trabajo.
+         * 
+         * @var string
+         */
+        $uri_from_workdir = $realpath->get_uri_from_workdir();
+
         $path = self::exclude_first_part($path);
-        $host = DLServer::get_http_host();
+        $path = "{$uri_from_workdir}/{$path}";
+        $path = RouteDebugger::trim_slash($path);
+
+        $path = urlencode($path);
+        $path = str_replace('%2F', '/', $path);
+        $path = str_replace('+', '%20', $path);
+
+        $http_host = DLServer::get_http_host();
 
         /**
          * URL que apunta al archivo CSS
          * 
          * @var string
          */
-        $url = "{$host}/{$path}.css";
+        $url = "{$http_host}/{$path}.css";
 
         return "<link rel=\"stylesheet\" href=\"{$url}?{$hash}\" />";
     }
@@ -170,9 +189,9 @@ class ResourceManager implements ResourceInterface {
             $path = RouteDebugger::remove_trailing_slash($path);
             $path = self::exclude_first_part($path);
             $path = "{$uri_from_workdir}/{$path}";
-            
+
             $path = RouteDebugger::clear_route($path);
-            
+
             /**
              * Ruta al archivo JS a través del protocolo HTTP.
              * 
@@ -180,25 +199,281 @@ class ResourceManager implements ResourceInterface {
              */
             $js_file = "{$route}/{$path}.js";
 
-            return "<script type=\"{$type}\" src=\"{$js_file}?{$hash}\" nonce=\"{$token}\"{$behavior_attributes} />";
+            return "<script type=\"{$type}\" src=\"{$js_file}?{$hash}\" nonce=\"{$token}\" {$behavior_attributes}></script>";
         }
 
         return "<script nonce=\"{$token}\">{$js_content}</script>";
     }
 
-    public static function favicon(string $path): string {
+    public static function image(string $path, object|array|null $config = null): string {
+        /**
+         * Indica si debe ser presentada codificada como base64.
+         * 
+         * @var boolean
+         */
+        $base64 = false;
 
-        return $path;
+        /**
+         * Título de la imagen.
+         * 
+         * @var string
+         */
+        $title = "";
+
+        if (!is_null($config)) {
+            $config = (object) $config;
+
+            $base64 = $config->base64 ?? false;
+            $title = $config->title ?? '';
+        }
+
+        $realpath = DLRealPath::get_instance();
+
+        /**
+         * Directorio raíz de la aplicación.
+         * 
+         * @var string
+         */
+        $root = $realpath->get_document_root();
+
+        /**
+         * URI del directorio de trabajo.
+         * 
+         * @var string
+         */
+        $uri_from_workdir = $realpath->get_uri_from_workdir();
+        $uri_from_workdir = RouteDebugger::trim_slash($uri_from_workdir);
+
+        /**
+         * Archivo de imagen.
+         * 
+         * @var string
+         */
+        $image_file = "{$root}/{$path}";
+
+        /**
+         * Tipo de archivos
+         * 
+         * @var string
+         */
+        $type = FileInfo::get_type($image_file);
+
+        if (!file_exists($image_file)) {
+            return "";
+        }
+
+        if (!FileInfo::is_image($image_file)) {
+            return "<!-- No es un formato de imagen válido -->";
+        }
+
+        /**
+         * URL de la aplicación.
+         * 
+         * @var string
+         */
+        $http_host = DLServer::get_http_host();
+
+        /**
+         * Ruta HTTP de la imagen.
+         * 
+         * @var string
+         */
+        $src = "{$uri_from_workdir}/" . self::exclude_first_part($path);
+        $src = RouteDebugger::trim_slash($src);
+
+        /**
+         * Ruta HTTP de la imagen.
+         * 
+         * @var string
+         */
+        $src = "{$http_host}/{$src}";
+        $src = trim($src);
+
+        /**
+         * Código HTML de la imagen
+         * 
+         * @var string
+         */
+        $html = self::get_image([
+            "src" => $src,
+            "type" => $type,
+            "title" => $title
+        ]);
+
+        if ($base64) {
+            /**
+             * Contenido binario del archivo.
+             * 
+             * @var string
+             */
+            $content = file_get_contents($image_file);
+            $content = base64_encode($content);
+            $content = "data:{$type};base64,{$content}";
+
+            $html = self::get_image([
+                "title" => $title,
+                "type" => trim($type),
+                "src" => $content
+            ]);
+        }
+
+        return $html;
     }
 
-    public static function image(string $path): string {
+    /**
+     * Devuelve la estractura HTML de la imagen.
+     * 
+     * Ejemplo de uso:
+     * 
+     * ```
+     *  $image = self::get_image()
+     * ```
+     *
+     * @param object | array $info Información del archivo.
+     * @return string
+     */
+    private static function get_image(object | array $info): string {
+        $info = (object) $info;
 
-        return $path;
+        /**
+         * Tipo de archivos.
+         * 
+         * @var string
+         */
+        $type = $info->type ?? '';
+
+        /**
+         * Título de la imagen.
+         * 
+         * @var string
+         */
+        $title = $info->title ?? '';
+
+        /**
+         * Ruta o contenido de la imagen.
+         * 
+         * @var string
+         */
+        $src = RouteDebugger::url_encode($info->src ?? '');
+
+        /**
+         * Código HTML.
+         * 
+         * @var string
+         */
+        $html = "<picture>
+                    <source srcset=\"{$src}\" type=\"{$type}\" title=\"{$title}\">
+                    <img src=\"{$src}\" alt=\"{$title}\" title=\"{$title}\">
+                </picture>";
+
+        $html = preg_replace("/\s+/", ' ', $html);
+
+        return trim($html);
     }
 
-    public static function route(string $path): string {
-        $host = DLServer::get_http_host();
-        return "{$host}/{$path}";
+    public static function asset(string $path): string {
+        $pattern = "/\.(?!.*\.)[^.]+$/";
+        /**
+         * Indica si se capturó la extensión del archivo.
+         * 
+         * @var string
+         */
+        $found = preg_match($pattern, $path, $matches);
+        
+        /**
+         * Extensión capturada del archivo.
+         * 
+         * @var string
+         */
+        $extension = "";
+
+        if ($found) {
+            $extension = $matches[0] ?? '';
+        }
+
+        $path = preg_replace($pattern, '', $path);
+        $path = RouteDebugger::dot_to_slash($path);
+        $path = "{$path}{$extension}";
+
+        /**
+         * Instancia de DLRealPath
+         * 
+         * @var DLRealPath
+         */
+        $realpath = DLRealPath::get_instance();
+
+        /**
+         * URI del directorio de trabajo.
+         * 
+         * @var string
+         */
+        $uri_from_workdir = $realpath->get_uri_from_workdir();
+
+        /**
+         * Directorio raíz del proyecto.
+         * 
+         * @var string
+         */
+        $root = $realpath->get_document_root();
+
+        /**
+         * Ruta del archivo.
+         * 
+         * @var string
+         */
+        $route = RouteDebugger::trim_slash($path);
+
+        /**
+         * Nombre de archivo.
+         * 
+         * @var string
+         */
+        $filename = "{$root}/{$route}";
+
+        /**
+         * Ruta del archivo.
+         * 
+         * @var string
+         */
+        $route = self::exclude_first_part($route);
+
+        if (!file_exists($filename)) {
+            return "<!-- El archivo {$route} no existe -->";
+        }
+
+        /**
+         * Contenido del archivo.
+         * 
+         * @var string
+         */
+        $content = file_get_contents($filename);
+
+        /**
+         * Suma de verificación del archivo.
+         * 
+         * @var string
+         */
+        $hash = hash('sha256', $content);
+
+        /**
+         * URL sin la URI.
+         * 
+         * @var string
+         */
+        $http_host = DLServer::get_http_host();
+
+        $filename = "{$uri_from_workdir}/{$route}?{$hash}";
+        $filename = trim($filename);
+        $filename = RouteDebugger::trim_slash($filename);
+
+        /**
+         * URL completa del archivo.
+         * 
+         * @var string
+         */
+        $url = "{$http_host}/{$filename}";
+
+        return RouteDebugger::url_encode($url);
     }
 
     /**

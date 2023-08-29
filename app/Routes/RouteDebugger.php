@@ -33,13 +33,7 @@ class RouteDebugger implements DebuggerInterface {
         return $dir;
     }
 
-    /**
-     * Convierte los puntos en barras diagonales.
-     *
-     * @param string $path
-     * @return string
-     */
-    private static function dot_to_slash(string $path): string {
+    public static function dot_to_slash(string $path): string {
         $path = preg_replace("/\.+/", DIRECTORY_SEPARATOR, $path);
         return trim($path);
     }
@@ -67,5 +61,19 @@ class RouteDebugger implements DebuggerInterface {
         $path = trim($path, '\/');
 
         return $path;
+    }
+
+    public static function url_encode(string $path): string {
+        $path = urldecode($path);
+
+        $path = urlencode($path);
+        $path = str_replace('%2F', '/', $path);
+        $path = str_replace('+', '%20', $path);
+        $path = str_replace('%3A', ':', $path);
+        $path = str_replace('%3F','?', $path);
+        $path = str_replace('%26', '&', $path);
+        $path = str_replace('%3D', '=', $path);
+        
+        return trim($path);
     }
 }

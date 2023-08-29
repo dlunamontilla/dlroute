@@ -33,22 +33,26 @@ interface ResourceInterface {
     public static function js(string $path, array $options): string;
 
     /**
-     * Crea una ruta amigable para los archivos de tipo favicon.
-     *
-     * @param string $path Ruta del archivo de iconos.
-     * @return string
-     */
-    public static function favicon(string $path): string;
-
-    /**
      * Procesa las imágenes. Esta función permite definir si la imagen se presenta como un archivo
      * externo y se incluye directamente siendo codificada a base 64.
-     *
+     * 
+     * Ejemplo de uso:
+     * 
+     * ```
+     * $output = ResourceManager::image('public/image.jpg', [
+     *  "title" => "Título de la imagen",
+     *  "base64" => true
+     * ]);
+     *```
+     * 
+     * Si `base64` es `true`, entonces, el contenido de la imagen se colocará directamente en el código en formato
+     * base 64, en lugar de su ruta.
+     * 
      * @param string $path Ruta de la imagen
-     * @param boolean|null $base64 Se indica si se trata como un archivo externo o se incluye directamente como base 64.
+     * @param boolean|null $config Configuración de la imagen.
      * @return string
      */
-    public static function image(string $path): string;
+    public static function image(string $path, object|array|null $config = null): string;
 
     /**
      * Establece la ruta HTTP de un archivo a partir de una URI
@@ -56,5 +60,5 @@ interface ResourceInterface {
      * @param string $path Ruta del archivo.
      * @return string
      */
-    public static function route(string $path): string;
+    public static function asset(string $path): string;
 }

@@ -15,7 +15,7 @@ interface DebuggerInterface {
     /**
      * Procesa las rutas que apuntan directo al recurso.
      *
-     * @param string $path
+     * @param string $path Ruta que apunta directo al recurso.
      * @return string
      */
     public static function process_route(string $path): string;
@@ -36,7 +36,7 @@ interface DebuggerInterface {
      * /ruta/index.php
      * ```
      *
-     * @param string $path
+     * @param string $path Ruta al que removerá la última o últimas diagonales
      * @return string
      */
     public static function remove_trailing_slash(string $path): string;
@@ -49,4 +49,20 @@ interface DebuggerInterface {
      * @return string
      */
     public static function trim_slash(string $path): string;
+
+    /**
+     * Reemplaza los puntos por barras diagonales `/`.
+     *
+     * @param string $path Ruta que será procesada.
+     * @return string
+     */
+    public static function dot_to_slash(string $path): string;
+
+    /**
+     * Codifica la URL
+     *
+     * @param string $path
+     * @return string
+     */
+    public static function url_encode(string $path): string;
 }

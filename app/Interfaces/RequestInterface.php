@@ -15,7 +15,7 @@ namespace DLRoute\Interfaces;
 interface RequestInterface {
 
     /**
-     * Valida si las peticiones hechas por el método GET son correctas
+     * Valida si las peticiones hechas por el método GET son correctas1
      * 
      * Es decir, lo puede hacer de esta forma:
      * 
