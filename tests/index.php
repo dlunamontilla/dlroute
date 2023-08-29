@@ -80,6 +80,13 @@ DLRoute::delete('/home', function() use ($method) {
     print_r($test);
 });
 
-$test = ResourceManager::asset('tests.test.jpg');
+// $test = ResourceManager::asset('tests.test.jpg');
+// $test = ResourceManager::css('tests.test', false);
+$test = ResourceManager::js('tests.test', [
+    "external" => true,
+    "type" => "module",
+    "token" => hash('sha256', 'Contenido del token'),
+    "behavior_attributes" => 'defer'
+]);
 
 echo "\n{$test}";

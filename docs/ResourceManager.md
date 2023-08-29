@@ -131,7 +131,7 @@ console.log({ test: "Archivo con contenido de prueba" });
 console.log({ test: "Esta es otra prueba" });
 ```
 
-Para que pueda ser usando en una implementación donde se utilicen rutas amigables para archivos JavaScript.
+Está pensado para implementarse en rutas amigables.
 
 > Esto está pensado para usarse en el _micro-framework_ `DLUnire`
 

@@ -48,41 +48,14 @@ class ResourceManager implements ResourceInterface {
          * 
          * @var string
          */
-        $css_content = "";
+        $css_content = file_get_contents($filename);
+        $css_content = trim($css_content);
 
         if (!$external) {
-            $css_content = file_get_contents($filename);
-            $css_content = trim($css_content);
             return "<style>{$css_content}</style>";
         }
 
-        $realpath = DLRealPath::get_instance();
-
-        /**
-         * URI del directorio de trabajo.
-         * 
-         * @var string
-         */
-        $uri_from_workdir = $realpath->get_uri_from_workdir();
-
-        $path = self::exclude_first_part($path);
-        $path = "{$uri_from_workdir}/{$path}";
-        $path = RouteDebugger::trim_slash($path);
-
-        $path = urlencode($path);
-        $path = str_replace('%2F', '/', $path);
-        $path = str_replace('+', '%20', $path);
-
-        $http_host = DLServer::get_http_host();
-
-        /**
-         * URL que apunta al archivo CSS
-         * 
-         * @var string
-         */
-        $url = "{$http_host}/{$path}.css";
-
-        return "<link rel=\"stylesheet\" href=\"{$url}?{$hash}\" />";
+        return $css_content;
     }
 
     public static function js(string $path, ?array $options = []): string {
@@ -100,13 +73,6 @@ class ResourceManager implements ResourceInterface {
         if (!file_exists($filename)) {
             return "<!-- El archivo {$path}.js no existe -->";
         }
-
-        /**
-         * Hash calculado del archivo JavaScript.
-         * 
-         * @var string
-         */
-        $hash = self::calculate_hash($filename);
 
         /**
          * @var array|object
@@ -158,51 +124,14 @@ class ResourceManager implements ResourceInterface {
          * 
          * @var string.
          */
-        $js_content = "";
-
-        if (!$external) {
-            $js_content = file_get_contents($filename);
-        }
-
-        $js_content = trim($js_content);
+        $js_content = file_get_contents($filename);
+        $js_content = trim((string) $js_content);
 
         if ($external) {
-            $realpath = DLRealPath::get_instance();
-
-            /**
-             * URI del directorio de trabajo.
-             * 
-             * @var string
-             */
-            $uri_from_workdir = $realpath->get_uri_from_workdir();
-
-            /**
-             * Ruta HTTP.
-             * 
-             * @var string
-             */
-            $route = DLServer::get_http_host();
-
-            # Eliminar la primera o primeras barrras diagionales (//) de `$path`
-            $path = preg_replace("/^\/+|\/+$/", "", $path);
-
-            $path = RouteDebugger::remove_trailing_slash($path);
-            $path = self::exclude_first_part($path);
-            $path = "{$uri_from_workdir}/{$path}";
-
-            $path = RouteDebugger::clear_route($path);
-
-            /**
-             * Ruta al archivo JS a través del protocolo HTTP.
-             * 
-             * @var string
-             */
-            $js_file = "{$route}/{$path}.js";
-
-            return "<script type=\"{$type}\" src=\"{$js_file}?{$hash}\" nonce=\"{$token}\" {$behavior_attributes}></script>";
+            return $js_content;
         }
 
-        return "<script nonce=\"{$token}\">{$js_content}</script>";
+        return "<script type=\"{$type}\" nonce=\"{$token}\" {$behavior_attributes}>{$js_content}</script>";
     }
 
     public static function image(string $path, object|array|null $config = null): string {
@@ -379,7 +308,7 @@ class ResourceManager implements ResourceInterface {
          * @var string
          */
         $found = preg_match($pattern, $path, $matches);
-        
+
         /**
          * Extensión capturada del archivo.
          * 
