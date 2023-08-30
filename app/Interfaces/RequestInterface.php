@@ -153,4 +153,10 @@ interface RequestInterface {
      */
     public function execute_delete_method(array $params, callable|array $controller, ?string $mime_type = null): void;
 
+    /**
+     * Devuelve las entradas del usuario.
+     *
+     * @return array
+     */
+    public function get_values(): array|string;
 }

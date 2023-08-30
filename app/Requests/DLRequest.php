@@ -45,9 +45,13 @@ class DLRequest implements RequestInterface {
         /**
          * Solicitud del usuario.
          * 
-         * @var array|null
+         * @var array|string
          */
         $request = $this->get_request();
+
+        if (is_string($request)) {
+            return false;
+        }
 
         /**
          * ¿Es equivalente?
@@ -55,15 +59,15 @@ class DLRequest implements RequestInterface {
          * @var bool
          */
         $is_equal = $this->is_field_equal($request, $params);
-        
+
         if (!$is_equal) {
             return false;
         }
-        
+
         if (!$this->validate_required_fields($request, $params)) {
             return false;
         }
-        
+
         return true;
     }
 
@@ -124,7 +128,7 @@ class DLRequest implements RequestInterface {
      *
      * @return array
      */
-    private function get_request(): array {
+    private function get_request(): array|string {
         /**
          * Parámetros de la petición.
          * 
@@ -132,11 +136,11 @@ class DLRequest implements RequestInterface {
          */
         $request = [];
 
-        if ($this->server->is_post()) {
+        if (DLServer::is_post()) {
             $request = $_POST;
         }
 
-        if ($this->server->is_get()) {
+        if (DLServer::is_get()) {
             $request = $_GET;
         }
 
@@ -145,17 +149,17 @@ class DLRequest implements RequestInterface {
          * 
          * @var string
          */
-        $input = file_get_contents('php://input');
+        $input = file_get_contents("php://input");
 
         if (empty($request)) {
             $request = json_decode($input, true);
         }
 
-        return $request ?? [];
+        return !is_null($request) ? $request : trim($input);
     }
-    
+
     public function get(array $params): bool {
-        if (!($this->server->is_get())) {
+        if (!(DLServer::is_get())) {
             return false;
         }
 
@@ -163,7 +167,7 @@ class DLRequest implements RequestInterface {
     }
 
     public function post(array $params): bool {
-        if (!($this->server->is_post())) {
+        if (!(DLServer::is_post())) {
             return false;
         }
 
@@ -171,7 +175,7 @@ class DLRequest implements RequestInterface {
     }
 
     public function put(array $params): bool {
-        if (!($this->server->is_put())) {
+        if (!(DLServer::is_put())) {
             return false;
         }
 
@@ -179,7 +183,7 @@ class DLRequest implements RequestInterface {
     }
 
     public function delete(array $params): bool {
-        if (!($this->server->is_delete())) {
+        if (!(DLServer::is_delete())) {
             return false;
         }
 
@@ -232,73 +236,75 @@ class DLRequest implements RequestInterface {
             exit;
         }
 
-        /**
-         * Nombre del controlador.
-         * 
-         * @var string
-         */
-        $controller_name = $controller[0] ?? '';
+        if (is_array($controller)) {
+            /**
+             * Nombre del controlador.
+             * 
+             * @var string
+             */
+            $controller_name = $controller[0] ?? null;
+    
+            /**
+             * Nombre del método a llamar.
+             * 
+             * @var string
+             */
+            $method_name = $controller[1] ?? null;
 
-        /**
-         * Nombre del método a llamar.
-         * 
-         * @var string
-         */
-        $method_name = $controller[1] ?? '';
+            $controller_name = trim($controller_name);
+            $method_name = trim($method_name);
+            
+            if (empty($controller_name)) {
+                http_response_code(500);
+    
+                echo DLOutput::get_json([
+                    "status" => false,
+                    "error" => "El controlador no está definido"
+                ]);
+    
+                exit;
+            }
 
-        $controller_name = trim($controller_name);
-        $method_name = trim($method_name);
-
-        if (empty($controller_name)) {
-            http_response_code(500);
-
-            echo DLOutput::get_json([
-                "status" => false,
-                "error" => "El controlador no está definido"
-            ]);
-
-            exit;
+            if (empty($method_name)) {
+                http_response_code(500);
+    
+                echo DLOutput::get_json([
+                    "status" => false,
+                    "error" => "Debe definir un método a ejecutar para el controlador '{$controller_name}'"
+                ]);
+    
+                exit;
+            }
+            
+            if (!class_exists($controller_name)) {
+                http_response_code(500);
+    
+                echo DLOutput::get_json([
+                    "status" => false,
+                    "error" => "El controlador '{$controller_name}' debe crearse"
+                ]);
+    
+                exit;
+            }
+    
+            if (!method_exists($controller_name, $method_name)) {
+                http_response_code(500);
+    
+                echo DLOutput::get_json([
+                    "status" => false,
+                    "error" => "Debe crear el método '{$method_name}' a ejecutar para el controlador '{$controller_name}'"
+                ]);
+    
+                exit;
+            }
+    
+            /**
+             * Instancia de clase.
+             */
+            $instance = new $controller_name;
+    
+            $data = $instance->{$method_name}($request);
         }
-
-        if (empty($method_name)) {
-            http_response_code(500);
-
-            echo DLOutput::get_json([
-                "status" => false,
-                "error" => "Debe definir un método a ejecutar para el controlador '{$controller_name}'"
-            ]);
-
-            exit;
-        }
-
-        if (!class_exists($controller_name)) {
-            http_response_code(500);
-
-            echo DLOutput::get_json([
-                "status" => false,
-                "error" => "El controlador '{$controller_name}' debe crearse"
-            ]);
-
-            exit;
-        }
-
-        if (!method_exists($controller_name, $method_name)) {
-            http_response_code(500);
-
-            echo DLOutput::get_json([
-                "status" => false,
-                "error" => "Debe crear el método '{$method_name}' a ejecutar para el controlador '{$controller_name}'"
-            ]);
-
-            exit;
-        }
-
-        /**
-         * Instancia de clase.
-         */
-        $instance = new $controller_name;
-
-        $data = $instance->{$method_name}();
 
         $this->output->set_content($data);
         $this->output->print_response_data($mime_type);
@@ -334,5 +340,14 @@ class DLRequest implements RequestInterface {
         }
 
         $this->execute_controller($controller, $mime_type);
+    }
+
+    /**
+     * Devuelve los valores de la petición
+     *
+     * @return array
+     */
+    public function get_values(): array|string {
+        return $this->get_request();
     }
 }
