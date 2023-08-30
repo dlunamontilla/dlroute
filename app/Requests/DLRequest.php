@@ -4,8 +4,6 @@ namespace DLRoute\Requests;
 
 use DLRoute\Interfaces\RequestInterface;
 use DLRoute\Server\DLServer;
-use Trading\Requests\DLOutput;
-
 
 /**
  * Procesa las peticiones del usuario.
@@ -47,9 +45,13 @@ class DLRequest implements RequestInterface {
         /**
          * Solicitud del usuario.
          * 
-         * @var array
+         * @var array|null
          */
         $request = $this->get_request();
+
+        if (is_null($request)) {
+            return false;
+        }
 
         /**
          * ¿Es equivalente?
@@ -124,10 +126,15 @@ class DLRequest implements RequestInterface {
     /**
      * Devuelve los parámetros de la petición en un array asociativo.
      *
-     * @return array
+     * @return array|null
      */
-    private function get_request(): array {
-        $request = $_REQUEST;
+    private function get_request(): array|null {
+        /**
+         * Parámetros de la petición.
+         * 
+         * @var array<string, string>
+         */
+        $request = [];
 
         if ($this->server->is_post()) {
             $request = $_POST;
@@ -137,11 +144,22 @@ class DLRequest implements RequestInterface {
             $request = $_GET;
         }
 
+        /**
+         * Entradas del usuario.
+         * 
+         * @var string
+         */
+        $input = file_get_contents('php://input');
+
+        if (empty($request)) {
+            $request = json_decode($input, true);
+        }
+
         return $request;
     }
     
     public function get(array $params): bool {
-        if (!$this->server->is_get()) {
+        if (!($this->server->is_get())) {
             return false;
         }
 
@@ -149,7 +167,23 @@ class DLRequest implements RequestInterface {
     }
 
     public function post(array $params): bool {
-        if (!$this->server->is_post()) {
+        if (!($this->server->is_post())) {
+            return false;
+        }
+
+        return $this->validate($params);
+    }
+
+    public function put(array $params): bool {
+        if (!($this->server->is_put())) {
+            return false;
+        }
+
+        return $this->validate($params);
+    }
+
+    public function delete(array $params): bool {
+        if (!($this->server->is_delete())) {
             return false;
         }
 
@@ -181,6 +215,10 @@ class DLRequest implements RequestInterface {
          * @var array
          */
         $request = $this->get_request();
+
+        if (is_null($request)) {
+            return;
+        }
 
         /**
          * @var mixed

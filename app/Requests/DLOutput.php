@@ -1,6 +1,6 @@
 <?php
 
-namespace Trading\Requests;
+namespace DLRoute\Requests;
 
 use DLRoute\Interfaces\OutputInterface;
 
