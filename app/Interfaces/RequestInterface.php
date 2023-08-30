@@ -57,7 +57,55 @@ interface RequestInterface {
     public function post(array $params): bool;
 
     /**
-     * Ejecuta el controlador asociado al método GET.
+     * Valida si los parámetros de la petición hecha por el método HTTP PUT son válidas.
+     * 
+     * Puede validar de la siguiente manera:
+     * 
+     * ```
+     * $params = [
+     *  "campo1" => true,
+     *  "campo2" => false
+     * ];
+     * 
+     * if ($request->put($params)) {
+     *  # Lógica a ejecutar si los parámetros son válidos.
+     * }
+     * ```
+     * 
+     * ### Importante
+     * 
+     * Tome en cuenta que si cualquiera de los campos vale `true` significa que es requerido. En el caso contrario,
+     * no se considera requerido, es decir, puede ir sin contenido.
+     * 
+     * @param array $params
+     * @return boolean
+     */
+    public function put(array $params): bool;
+
+    /**
+     * Valida si los parámetros de la petición hecha por el método HTTP DELETE son válidas.
+     * 
+     * Puede validar de la siguiente manera:
+     * 
+     * ```
+     * $params = [
+     *  "campo1" => true,
+     *  "campo2" => false
+     * ];
+     * ```
+     *
+     * ### Importante
+     * 
+     * Tome en cuenta que si cualquiera de los campos vale `true`, es requerido. En el caso contrario,
+     * no se considera requerido, es decir, puede ir vacío.
+     * 
+     * @param array $params
+     * @return boolean
+     */
+    public function delete(array $params): bool;
+
+    /**
+     * Ejecuta el controlador asociado al método HTTP GET.
      *
      * Esta función ejecuta el controlador proporcionado cuando se recibe una solicitud GET.
      *
@@ -70,7 +118,7 @@ interface RequestInterface {
 
 
     /**
-     * Ejecuta el controlador asociado al método POST.
+     * Ejecuta el controlador asociado al método HTTP POST.
      *
      * Esta función ejecuta el controlador proporcionado cuando se recibe una solicitud POST.
      *
@@ -80,4 +128,29 @@ interface RequestInterface {
      * @return void
      */
     public function execute_post_method(array $params, callable|array $controller, ?string $mime_type = null): void;
+
+    /**
+     * Ejecuta el controlador asociado al método HTTP PUT.
+     *
+     * Esta función ejecuta el controlador proporcionado cuando se recibe una solicitud PUT.
+     *
+     * @param array $params Los parámetros de la solicitud.
+     * @param callable|array $controller El controlador que se ejecutará.
+     * @param string|null $mime_type (Opcional) El tipo MIME de la respuesta.
+     * @return void
+     */
+    public function execute_put_method(array $params, callable|array $controller, ?string $mime_type = null): void;
+
+    /**
+     * Ejecuta el controlador asociado al método HTTP DELETE.
+     *
+     * Esta función ejecuta el controlador proporcionado cuando se recibe una solicitud DELETE.
+     *
+     * @param array $params Los parámetros de la solicitud.
+     * @param callable|array $controller El controlador que se ejecutará.
+     * @param string|null $mime_type (Opcional) El tipo MIME de la respuesta.
+     * @return void
+     */
+    public function execute_delete_method(array $params, callable|array $controller, ?string $mime_type = null): void;
+
 }

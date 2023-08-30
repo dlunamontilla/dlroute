@@ -49,10 +49,6 @@ class DLRequest implements RequestInterface {
          */
         $request = $this->get_request();
 
-        if (is_null($request)) {
-            return false;
-        }
-
         /**
          * ¿Es equivalente?
          * 
@@ -126,9 +122,9 @@ class DLRequest implements RequestInterface {
     /**
      * Devuelve los parámetros de la petición en un array asociativo.
      *
-     * @return array|null
+     * @return array
      */
-    private function get_request(): array|null {
+    private function get_request(): array {
         /**
          * Parámetros de la petición.
          * 
@@ -155,7 +151,7 @@ class DLRequest implements RequestInterface {
             $request = json_decode($input, true);
         }
 
-        return $request;
+        return $request ?? [];
     }
     
     public function get(array $params): bool {
@@ -215,10 +211,6 @@ class DLRequest implements RequestInterface {
          * @var array
          */
         $request = $this->get_request();
-
-        if (is_null($request)) {
-            return;
-        }
 
         /**
          * @var mixed
@@ -322,6 +314,22 @@ class DLRequest implements RequestInterface {
 
     public function execute_post_method(array $params, callable | array $controller, ?string $mime_type = null): void {
         if (!$this->post($params)) {
+            return;
+        }
+
+        $this->execute_controller($controller, $mime_type);
+    }
+
+    public function execute_put_method(array $params, callable | array $controller, ?string $mime_type = null): void {
+        if (!$this->put($params)) {
+            return;
+        }
+
+        $this->execute_controller($controller, $mime_type);
+    }
+
+    public function execute_delete_method(array $params, callable | array $controller, ?string $mime_type = null): void {
+        if (!$this->delete($params)) {
             return;
         }
 
