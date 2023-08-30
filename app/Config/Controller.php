@@ -34,7 +34,7 @@ abstract class Controller {
      *
      * @return string
      */
-    public function get_ip(): string {
+    protected function get_ip(): string {
         return DLServer::get_ipaddress();
     }
 
@@ -44,7 +44,7 @@ abstract class Controller {
      *
      * @return string
      */
-    public function get_http_host(): string {
+    protected function get_http_host(): string {
         return DLServer::get_http_host();
     }
 
@@ -57,7 +57,7 @@ abstract class Controller {
      * @param bool $pretty Indica si la salida en formato JSON debe tener formato legible o no.
      * @return string La cadena de texto en formato JSON resultante.
      */
-    public function get_json(array|object $data, bool $pretty = false): string {
+    protected function get_json(array|object $data, bool $pretty = false): string {
         return DLOutput::get_json($data, $pretty);
     }
 }
