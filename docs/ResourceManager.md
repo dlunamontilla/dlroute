@@ -81,7 +81,7 @@ Donde cada punto (`.`) será transformado automáticamente en una barra diagonal
 **Sintaxis:**
 
 ```php
-ResourceManager::js(string $path, array $options): string
+ResourceManager::js(string $path, ?array $options = []): string
 ```
 
 **Parámetros:**
@@ -97,6 +97,17 @@ ResourceManager::js(string $path, array $options): string
   - **`type`:** Permite indicar si el archivo JavaScript es un módulo `type="module"` o no. NO tiene efecto si `external` es `true`.
 
   - **`token`:** Permite establecer un _token_ de seguridad para garantizar que solo se ejecuten _scripts_ que contenga dicho token. El _token_ debe ser aleatorio. De hecho, está pensado para usarse en el _mini-framework_ **DLUnire**. No tiene efecto si `external` es `true`.
+
+Ejemplo de uso:
+
+```php
+$test = ResourceManager::js('tests.test', [
+    "external" => true,
+    "type" => "module",
+    "token" => hash('sha256', 'Contenido del token'),
+    "behavior_attributes" => 'defer'
+]);
+```
 
 Por defecto, incorpora código JavaScript directamente en una salida HTML; por ejemplo:
 
@@ -142,16 +153,60 @@ Procesa las imágenes directamente en base64.
 **Sintaxis:**
 
 ```php
-ResourceManager::image(string $filename): string;
+ResourceManager::image(string $filename, object|array|null $config = null): string|false;
 ```
 
 **Parámetros:**
 
 - **`$filename`:** Ruta de la imagen.
+- **`$config`:** Permite indicar si la imagen se presenta como código HTML o directamente como un archivo binario.
+  - **`title`:** Título de la imagen.
+  - **`html`:** Permite indicar si la imagen debe presentarse como código HTML o no.
+
+Por ejemplo, si la imagen la queremos obtener como código HTML:
+
+```php
+$test = ResourceManager::image('tests.test.test', [
+    "html" => false,
+    "title" => "Título de la imagen",
+]);
+
+echo $test;
+```
+
+O directamente, como archivo binario:
+
+```php
+$test = ResourceManager::image('tests.test.jpg', [
+    "html" => true,
+    "title" => "Título de la imagen",
+]);
+
+echo $test;
+```
+
+Si en el parámetron `$config` `html` es `false`, la clave o propiedad `title` no tendrá efecto, por lo tanto, usar de esta forma:
+
+```php
+$test = ResourceManager::image('tests.test.jpg', [
+    "html" => true,
+]);
+
+echo $test;
+```
+
+O directamente:
+
+```php
+$test = ResourceManager::image('tests.test.jpg');
+echo $test;
+```
+
+Si la imagen no tiene extensión, el método `ResourceManager::image` sabrá si es o no una imagen. Si el archivo de imagen no existe o no es una imagen, simplemente, devolverá `false`:
 
 ## Método `ResourceManager::asset`
 
-Establece la ruta HTTP de un recursos a partir de una URI. En este caso, los recursos deben encontrarse en el directorioi `public/` o cualquier otro directorio que pueda ser accedido desde el protocolo HTTP.
+Establece la URL completa del recurso a partir de la ruta dle archivo. En este caso, los recursos deben encontrarse en el directorio `public/` o cualquier otro directorio que pueda ser accedido desde el protocolo **HTTP**.
 
 **Sintaxis:**
 
@@ -162,3 +217,5 @@ ResourceManager::asset(string $filename): string;
 **Parámetros:**
 
 - **`$filename`:** Ruta del archivo o recurso.
+
+<!-- vanna.ai -->

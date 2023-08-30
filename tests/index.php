@@ -80,8 +80,8 @@ DLRoute::delete('/home', function() use ($method) {
     print_r($test);
 });
 
-// $test = ResourceManager::asset('tests.test.jpg');
-// $test = ResourceManager::css('tests.test', false);
+// $test = ResourceManager::asset('tests.test');
+// $test = ResourceManager::css('tests.test', true);
 $test = ResourceManager::js('tests.test', [
     "external" => true,
     "type" => "module",
@@ -89,4 +89,10 @@ $test = ResourceManager::js('tests.test', [
     "behavior_attributes" => 'defer'
 ]);
 
-echo "\n{$test}";
+// $test = ResourceManager::image('tests.test', [
+//     "html" => false,
+//     "title" => "Título de la imagen",
+// ]);
+
+// $test
+echo "{$test}";

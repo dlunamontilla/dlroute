@@ -134,13 +134,26 @@ class ResourceManager implements ResourceInterface {
         return "<script type=\"{$type}\" nonce=\"{$token}\" {$behavior_attributes}>{$js_content}</script>";
     }
 
-    public static function image(string $path, object|array|null $config = null): string {
+    public static function image(string $path, object|array|null $config = null): string | false {
+        /**
+         * Ruta auxiliar.
+         * 
+         * @var string
+         */
+        $aux_path = $path;
+
+        $path = self::process_uri($path);
+
+        if ($path === false) {
+            return "<!-- El recurso {$aux_path} no existe -->";
+        }
+
         /**
          * Indica si debe ser presentada codificada como base64.
          * 
          * @var boolean
          */
-        $base64 = false;
+        $html = false;
 
         /**
          * Título de la imagen.
@@ -152,7 +165,7 @@ class ResourceManager implements ResourceInterface {
         if (!is_null($config)) {
             $config = (object) $config;
 
-            $base64 = $config->base64 ?? false;
+            $html = $config->html ?? false;
             $title = $config->title ?? '';
         }
 
@@ -188,35 +201,27 @@ class ResourceManager implements ResourceInterface {
         $type = FileInfo::get_type($image_file);
 
         if (!file_exists($image_file)) {
-            return "";
+            return false;
         }
 
         if (!FileInfo::is_image($image_file)) {
-            return "<!-- No es un formato de imagen válido -->";
+            return false;
         }
 
         /**
-         * URL de la aplicación.
+         * Contenido binario del archivo.
          * 
          * @var string
          */
-        $http_host = DLServer::get_http_host();
+        $content = file_get_contents($image_file);
 
-        /**
-         * Ruta HTTP de la imagen.
-         * 
-         * @var string
-         */
-        $src = "{$uri_from_workdir}/" . self::exclude_first_part($path);
-        $src = RouteDebugger::trim_slash($src);
+        if (!$html) {
+            header("Content-Type: {$type}; charset=utf-8");
+            return trim($content);
+        }
 
-        /**
-         * Ruta HTTP de la imagen.
-         * 
-         * @var string
-         */
-        $src = "{$http_host}/{$src}";
-        $src = trim($src);
+        $content = base64_encode($content);
+        $content = "data:{$type};base64,{$content}";
 
         /**
          * Código HTML de la imagen
@@ -224,27 +229,10 @@ class ResourceManager implements ResourceInterface {
          * @var string
          */
         $html = self::get_image([
-            "src" => $src,
+            "src" => "$content",
             "type" => $type,
             "title" => $title
         ]);
-
-        if ($base64) {
-            /**
-             * Contenido binario del archivo.
-             * 
-             * @var string
-             */
-            $content = file_get_contents($image_file);
-            $content = base64_encode($content);
-            $content = "data:{$type};base64,{$content}";
-
-            $html = self::get_image([
-                "title" => $title,
-                "type" => trim($type),
-                "src" => $content
-            ]);
-        }
 
         return $html;
     }
@@ -255,7 +243,11 @@ class ResourceManager implements ResourceInterface {
      * Ejemplo de uso:
      * 
      * ```
-     *  $image = self::get_image()
+     *  $image = self::get_image([
+     *  "title" => $title,
+     *  "type" => $type,
+     *  "src" => $src
+     * ]);
      * ```
      *
      * @param object | array $info Información del archivo.
@@ -283,7 +275,7 @@ class ResourceManager implements ResourceInterface {
          * 
          * @var string
          */
-        $src = RouteDebugger::url_encode($info->src ?? '');
+        $src = $info->src ?? '';
 
         /**
          * Código HTML.
@@ -301,28 +293,18 @@ class ResourceManager implements ResourceInterface {
     }
 
     public static function asset(string $path): string {
-        $pattern = "/\.(?!.*\.)[^.]+$/";
         /**
-         * Indica si se capturó la extensión del archivo.
+         * Ruta auxilar.
          * 
          * @var string
          */
-        $found = preg_match($pattern, $path, $matches);
+        $aux_path = trim($path);
 
-        /**
-         * Extensión capturada del archivo.
-         * 
-         * @var string
-         */
-        $extension = "";
+        $path = self::process_uri($path);
 
-        if ($found) {
-            $extension = $matches[0] ?? '';
+        if ($path === false) {
+            return "El recurso {$aux_path} no existe";
         }
-
-        $path = preg_replace($pattern, '', $path);
-        $path = RouteDebugger::dot_to_slash($path);
-        $path = "{$path}{$extension}";
 
         /**
          * Instancia de DLRealPath
@@ -454,5 +436,66 @@ class ResourceManager implements ResourceInterface {
 
         $hash = hash('sha256', $content);
         return $hash;
+    }
+
+    /**
+     * Procesa la ruta que se pase como argumento. 
+     *
+     * @param string $path
+     * @return string
+     */
+    private static function process_uri(string $path): string | false {
+        $realpath = DLRealPath::get_instance();
+        $root = $realpath->get_document_root();
+
+        /**
+         * Expresión regular de búsqueda de extensión del archivo
+         * en el caso de que éste exista.
+         * 
+         * @var string
+         */
+        $pattern = "/\.(?!.*\.)[^.]+$/";
+
+        /**
+         * Indica si se capturó la extensión del archivo.
+         * 
+         * @var string
+         */
+        $found = preg_match($pattern, $path, $matches);
+
+        /**
+         * Extensión capturada del archivo.
+         * 
+         * @var string
+         */
+        $extension = "";
+
+        if ($found) {
+            $extension = $matches[0] ?? '';
+        }
+
+        $path = preg_replace($pattern, '', $path);
+        $path = RouteDebugger::dot_to_slash($path);
+        $path = "{$path}{$extension}";
+
+        $filename = "{$root}/{$path}";
+
+        /**
+         * Ruta auxiliar.
+         * 
+         * @var string
+         */
+        $aux_path = $path;
+
+        if (!file_exists($filename)) {
+            $filename = RouteDebugger::dot_to_slash($filename);
+            $path = RouteDebugger::dot_to_slash($path);
+        }
+
+        if (!file_exists($filename)) {
+            return false;
+        }
+
+        return $path;
     }
 }
