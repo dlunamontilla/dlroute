@@ -11,7 +11,8 @@ final class TestController extends Controller {
             "request" => $this->request->get_values(),
             "key" => false,
             "json" => $this->get_json([]),
-            "ip" => $this->get_ip()
+            "ip" => $this->get_ip(),
+            "data" => $data
         ];
     }
 }

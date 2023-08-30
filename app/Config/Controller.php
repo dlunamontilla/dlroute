@@ -23,7 +23,7 @@ abstract class Controller {
      *
      * @var DLRequest
      */
-    public DLRequest $request;
+    protected DLRequest $request;
 
     public function __construct() {
         $this->request = DLRequest::get_instance();

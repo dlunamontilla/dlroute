@@ -1,5 +1,6 @@
 <?php
 namespace DLRoute;
+use DLRoute\Config\Route;
 use DLRoute\Interfaces\RouteInterface;
 use DLRoute\Server\DLServer;
 
@@ -14,71 +15,44 @@ use DLRoute\Server\DLServer;
  * @license MIT
  * 
  */
-class DLRoute implements RouteInterface {
+class DLRoute extends Route implements RouteInterface {
     private static ?self $instance = null;
 
     public function __construct() {}
 
-    public static function get(string $uri, callable|array|string $controller): void {
+    public static function get(string $uri, callable|array|string $controller, array|object $data = []): void {
         
         if (!DLServer::is_get()) {
             return;
         }
 
-        self::request($uri, $controller);
+        self::request($uri, $controller, 'GET', $data);
     }
 
-    public static function post(string $uri, callable|array|string $controller): void {
+    public static function post(string $uri, callable|array|string $controller, array|object $data = []): void {
         if (!DLServer::is_post()) {
             return;
         }
 
-        self::request($uri, $controller);
+        self::request($uri, $controller, 'POST', $data);
     }
 
-    public static function put(string $uri, callable|array|string $controller): void {
+    public static function put(string $uri, callable|array|string $controller, array|object $data = []): void {
 
         if (!DLServer::is_put()) {
             return;
         }
 
-        self::request($uri, $controller);
+        self::request($uri, $controller, 'PUT', $data);
     }
 
-    public static function delete(string $uri, callable|array|string $controller): void {
+    public static function delete(string $uri, callable|array|string $controller, array|object $data = []): void {
 
         if (!DLServer::is_delete()) {
             return;
         }
 
-        self::request($uri, $controller);
-    }
-
-    /**
-     * Procesa la solicitud del usuario
-     *
-     * @param string $uri
-     * @param callable|array|string $controller
-     * @return void
-     */
-    private static function request(string $uri, callable|array|string $controller): void {
-        # Por ahora, lo dejamos así para revisar la salida.
-
-        /**
-         * @var array|string|int|float|boolean
-         */
-        $data = "";
-
-        if (is_array($controller)) {
-            $object = new $controller[0];
-            $data = $object->{$controller[1]};
-        }
-
-        if (is_callable($controller)) {
-            $data = $controller();
-        }
-
-        print_r($data);
+        self::request($uri, $controller, 'DELETE', $data);
     }
 
     private static function register_uri(string $uri): void {
