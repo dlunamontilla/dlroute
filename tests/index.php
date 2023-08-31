@@ -31,7 +31,10 @@ DLRoute::get('/una/ruta', function(array $data) {
 });
 
 DLRoute::get('/otra/ruta', function(array $data) {
-    return $data;
+    return [
+        "name" => "David Eduardo",
+        "lastname" => "Luna Montilla"
+    ];
 });
 
 

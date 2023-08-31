@@ -21,6 +21,7 @@ abstract class Route {
      */
     protected static array|object $vars = [];
 
+    protected static array $mime_types = [];
     /**
      * Procesa la solicitud del usuario
      *
@@ -30,16 +31,20 @@ abstract class Route {
      * @param array|object $vars Datos que pueden ser usados como parámetros del método del controlador.
      * @return void
      */
-    protected static function request(string $uri, callable|array|string $controller, string $method, array|object $vars): void {
+    protected static function request(string $uri, callable|array|string $controller, string $method, array|object $vars, string $mime_type = null): void {
         self::register_routes($method, $uri, $controller);
-        
-        foreach ($vars as $key => $value) {
-            if (is_string($value)) {
-                $value = trim($value);
-            }
-            
-            self::$vars[$key] = $value;
-        }
+        self::$vars[$method][$uri] = $vars;
+        self::$mime_types[$uri] = $mime_type;
+    }
+
+    /**
+     * Devuelve el tipo `mime` personalizado.
+     *
+     * @param string $route
+     * @return void
+     */
+    protected static function get_mime_type(string $route): string | null {
+        return self::$mime_types[$route] ?? null;
     }
 
     /**
@@ -48,6 +53,13 @@ abstract class Route {
      * @return void
      */
     public static function init(): void {
+        /**
+         * Variables
+         * 
+         * @var array|object
+         */
+        $vars = self::get_vars();
+
         /**
          * Salida del controlador.
          * 
@@ -63,11 +75,19 @@ abstract class Route {
         $route = DLServer::get_route();
 
         /**
+         * Tipo personalizado.
+         * 
+         * @var string|null
+         */
+        $mime_type = self::get_mime_type($route);
+
+        /**
          * Controlador asociado a la ruta y método de la petición.
          * 
          * @var callable|array|string|null
          */
         $controller = self::get_controller($route);
+
 
         if (is_null($controller)) {
             self::response_code(404);
@@ -82,21 +102,21 @@ abstract class Route {
         }
 
         if (is_string($controller)) {
-            $data = self::string_controller($controller, self::$vars);
+            $data = self::string_controller($controller, $vars);
         }
 
         if (is_callable($controller)) {
-            $data = self::callable_controller($controller, self::$vars);
+            $data = self::callable_controller($controller, $vars);
         }
 
         if (is_array($controller)) {
-            $data = self::array_controller($controller, self::$vars);
+            $data = self::array_controller($controller, $vars);
         }
 
         $output = DLOutput::get_instance();
 
         $output->set_content($data);
-        $output->print_response_data();
+        $output->print_response_data($mime_type);
     }
 
     /**
@@ -489,5 +509,45 @@ abstract class Route {
             "status" => false,
             "error" => "Error del sistema"
         ]);
+    }
+
+    /**
+     * Devuelve las variables asociadas al método HTTP y su ruta.
+     *
+     * @return array
+     */
+    private static function get_vars(): array|object {
+        /**
+         * Ruta HTTP
+         * 
+         * @var string
+         */
+        $route = DLServer::get_route();
+
+        /**
+         * Método HTTP de la petición
+         * 
+         * @var string
+         */
+        $method = DLServer::get_method();
+
+        /**
+         * Variables
+         * 
+         * @var array
+         */
+        $vars = [];
+
+        if (!array_key_exists($method, self::$vars)) {
+            return $vars;
+        }
+
+        if (!array_key_exists($route, self::$vars[$method])) {
+            return $vars;
+        }
+
+        $vars = self::$vars[$method][$route] ?? [];
+
+        return $vars;
     }
 }

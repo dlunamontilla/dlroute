@@ -97,4 +97,19 @@ interface ServerInterface {
      * @return boolean
      */
     public static function is_delete(): bool;
+
+    /**
+     * Devuelve la ruta actual de la petición. Esto es independiente
+     * de la URI, es decir, no devuelve rutas físicas.
+     *
+     * @return string
+     */
+    public static function get_route(): string;
+
+    /**
+     * Devuelve el script actual de ejecución.
+     *
+     * @return string
+     */
+    public static function get_script_name(): string;
 }
