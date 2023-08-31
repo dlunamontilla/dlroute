@@ -26,27 +26,31 @@ abstract class Route {
     protected static function request(string $uri, callable|array|string $controller, string $method, array|object $vars): void {
         # Por ahora, lo dejamos así para revisar la salida.
 
-        self::register_routes($method, $uri);
-
-        if (is_string($controller)) {
-            self::string_controller($controller, $vars);
-        }
-
         /**
+         * Salida de la petición.
+         * 
          * @var mixed
          */
         $data = null;
 
-        if (is_array($controller)) {
-            $object = new $controller[0];
-            $data = $object->{$controller[1]};
+        self::register_routes($method, $uri);
+
+        if (is_string($controller)) {
+            $data = self::string_controller($controller, $vars);
         }
 
         if (is_callable($controller)) {
-            $data = $controller();
+            $data = self::callable_controller($controller, $vars);
         }
 
-        print_r(self::$routes);
+        if (is_array($controller)) {
+            $data = self::array_controller($controller, $vars);
+        }
+
+        $output = DLOutput::get_instance();
+
+        $output->set_content($data);
+        $output->print_response_data();
     }
 
     /**

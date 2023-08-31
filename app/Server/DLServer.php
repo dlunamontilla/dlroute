@@ -101,6 +101,57 @@ class DLServer implements ServerInterface {
         return "{$protocol}{$http_host}";
     }
 
+    public static function get_route(): string {
+        /**
+         * URI de la aplicación.
+         * 
+         * @var string
+         */
+        $uri = self::get_uri();
+        $uri = urldecode($uri);
+
+        /**
+         * Nombre del script
+         * 
+         * @var string
+         */
+        $script_name = self::get_script_name();
+
+        /**
+         * Ruta relativa de ejecución de la aplicación.
+         * 
+         * @var string
+         */
+        $relative_route = dirname($script_name);
+        $relative_route = trim($relative_route);
+        $relative_route = urldecode($relative_route);
+
+        if ($relative_route === "/") {
+            $relative_route = "";
+        }
+        
+        /**
+         * Ruta virtual.
+         * 
+         * @var string
+         */
+        $virtual_route = str_replace($relative_route, '', $uri);
+        $virtual_route = trim($virtual_route);
+        $virtual_route = "/{$virtual_route}";
+        $virtual_route = preg_replace("/\/+/", '/', $virtual_route);
+
+        if (empty($virtual_route)) {
+            $virtual_route .= "/";
+        }
+        
+        return $virtual_route;
+    }
+
+    public static function get_script_name(): string {
+        $script_name = $_SERVER['SCRIPT_NAME'] ?? '';
+        return urldecode($script_name);
+    }
+
     /**
      * Devuelve el protocolo HTTP que se está usando, es decir: `http` o `https`.
      *

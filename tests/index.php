@@ -20,5 +20,13 @@ $method = DLServer::get_method();
 // $request->execute_post_method(["name" => true], [TestController::class, 'index']);
 
 
-DLRoute::get('/una/ruta', "DLLuna\UnaCiencia@metodo");
+// DLRoute::get('/una/ruta', [TestController::class, 'index']);
+DLRoute::get('/una/ruta', function(array $data) {
+    return [
+        "name" => "David Eduardo",
+        "lastname" => "Luna Montilla",
+        "uri" => DLServer::get_uri(),
+        "route" => DLServer::get_route()
+    ];
+});
 
