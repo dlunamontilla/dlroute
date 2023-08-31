@@ -15,6 +15,13 @@ abstract class Route {
     protected static array $routes = [];
 
     /**
+     * Variables globales para el controlador.
+     *
+     * @var array|object
+     */
+    protected static array|object $vars = [];
+
+    /**
      * Procesa la solicitud del usuario
      *
      * @param string $uri Ruta a registrar.
@@ -24,27 +31,66 @@ abstract class Route {
      * @return void
      */
     protected static function request(string $uri, callable|array|string $controller, string $method, array|object $vars): void {
-        # Por ahora, lo dejamos así para revisar la salida.
+        self::register_routes($method, $uri, $controller);
+        
+        foreach ($vars as $key => $value) {
+            if (is_string($value)) {
+                $value = trim($value);
+            }
+            
+            self::$vars[$key] = $value;
+        }
+    }
 
+    /**
+     * Consulta las rutas y ejecuta el controlador en función de la ruta encontrada
+     *
+     * @return void
+     */
+    public static function init(): void {
         /**
-         * Salida de la petición.
+         * Salida del controlador.
          * 
          * @var mixed
          */
         $data = null;
 
-        self::register_routes($method, $uri);
+        /**
+         * Ruta de la petición.
+         * 
+         * @var string
+         */
+        $route = DLServer::get_route();
+
+        /**
+         * Controlador asociado a la ruta y método de la petición.
+         * 
+         * @var callable|array|string|null
+         */
+        $controller = self::get_controller($route);
+
+        if (is_null($controller)) {
+            self::response_code(404);
+
+            echo DLOutput::get_json([
+                "code" => 404,
+                "route" => $route,
+                "message" => "Página «{$route}» no encontrada"
+            ], true);
+
+            return;
+        }
 
         if (is_string($controller)) {
-            $data = self::string_controller($controller, $vars);
+            $data = self::string_controller($controller, self::$vars);
         }
 
         if (is_callable($controller)) {
-            $data = self::callable_controller($controller, $vars);
+            $data = self::callable_controller($controller, self::$vars);
         }
 
         if (is_array($controller)) {
-            $data = self::array_controller($controller, $vars);
+            $data = self::array_controller($controller, self::$vars);
         }
 
         $output = DLOutput::get_instance();
@@ -59,13 +105,42 @@ abstract class Route {
      * @param string $route
      * @return void
      */
-    protected static function register_routes(string $method, string $route): void {
+    protected static function register_routes(string $method, string $route, callable|array|string $controller): void {
+        self::$routes[$method][$route] = $controller;
+    }
+
+    /**
+     * Devuelve el controladora ejecutar en función de la ruta seleccionada por el usuario.
+     *
+     * @param string $route
+     * @return callable|array|string|null
+     */
+    protected static function get_controller(string $route): callable|array|string|null {
         /**
-         * Método HTTP.
+         * Método HTTP actual.
          * 
          * @var string
          */
         $method = DLServer::get_method();
+
+        /**
+         * Controlador que será devuelto.
+         * 
+         * @var callable|array|string|null
+         */
+        $controller = null;
+
+        if (!array_key_exists($method, self::$routes)) {
+            return $controller;
+        }
+
+        if (!array_key_exists($route, self::$routes[$method])) {
+            return $controller;
+        }
+
+        $controller = self::$routes[$method][$route] ?? null;
+
+        return $controller;
     }
 
     /**

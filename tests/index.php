@@ -30,3 +30,10 @@ DLRoute::get('/una/ruta', function(array $data) {
     ];
 });
 
+DLRoute::get('/otra/ruta', function(array $data) {
+    return $data;
+});
+
+
+DLRoute::init();
+
