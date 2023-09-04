@@ -6,6 +6,7 @@ use DLRoute\Requests\DLOutput;
 use DLRoute\Server\DLServer;
 
 abstract class Route {
+    use RouteParams;
 
     /**
      * Almacenamiento de rutas
@@ -126,6 +127,7 @@ abstract class Route {
      * @return void
      */
     protected static function register_routes(string $method, string $route, callable|array|string $controller): void {
+        self::process_params($route);
         self::$routes[$method][$route] = $controller;
     }
 
@@ -150,6 +152,9 @@ abstract class Route {
          */
         $controller = null;
 
+
+        // self::process_params(self::$routes);
+
         if (!array_key_exists($method, self::$routes)) {
             return $controller;
         }
@@ -171,7 +176,19 @@ abstract class Route {
      * @return mixed
      */
     protected static function callable_controller(callable $callback, array|object $data): mixed {
-        $content = $callback($data);
+        /**
+         * Parámetros de la petición.
+         * 
+         * @var object
+         */
+        $params = (object) (self::$params ?? []);
+
+        /**
+         * Salida del controlador.
+         * 
+         * @var mixed
+         */
+        $content = $callback($params, $data);
 
         if (is_string($content)) {
             $content = trim($content);
@@ -213,7 +230,7 @@ abstract class Route {
                 "error" => 'Controlador inválido'
             ]);
 
-            if (self::is_producction()) {
+            if (self::is_production()) {
                 self::set_error($error);
                 $error = self::get_generic_error();
             }
@@ -230,7 +247,7 @@ abstract class Route {
                 "error" => "Método del controlador inválido"
             ]);
 
-            if (self::is_producction()) {
+            if (self::is_production()) {
                 self::set_error($error);
                 $error = self::get_generic_error();
             }
@@ -249,7 +266,7 @@ abstract class Route {
                 "error" => "El controlador «{$controller_name}» no está definido."
             ]);
 
-            if (self::is_producction()) {
+            if (self::is_production()) {
                 self::set_error($error);
                 $error = self::get_generic_error();
             }
@@ -268,7 +285,7 @@ abstract class Route {
                 "error" => "El método «{$controller_method}» del controlador «{$controller_name}» no está definido"
             ]);
 
-            if (self::is_producction()) {
+            if (self::is_production()) {
                 self::set_error($error);
                 $error = self::get_generic_error();
             }
@@ -277,8 +294,24 @@ abstract class Route {
             exit;
         }
 
+        /**
+         * Instancia del controlador.
+         */
         $instance = new $controller_name;
-        $content = $instance->{$controller_method}($data);
+
+        /**
+         * Parámetros de la petición en una ruta amigable.
+         * 
+         * @var object
+         */
+        $params = (object) (self::$params ?? []);
+
+        /**
+         * Salida del controlador.
+         * 
+         * @var mixed
+         */
+        $content = $instance->{$controller_method}($params, $data);
 
         if (is_string($content)) {
             $content = trim($content);
@@ -321,7 +354,7 @@ abstract class Route {
                 "error" => 'Fomato de nombre de controlador inválido'
             ], true);
 
-            if (self::is_producction()) {
+            if (self::is_production()) {
                 self::set_error($error);
                 $error = self::get_generic_error();
             }
@@ -412,7 +445,7 @@ abstract class Route {
                 "error" => "Caracteres Inválidos"
             ], true);
 
-            if (self::is_producction()) {
+            if (self::is_production()) {
                 $_SESSION['error'] = $error;
 
                 $error = DLOutput::get_json([
@@ -432,7 +465,7 @@ abstract class Route {
                 "error" => "El nombre de clase debe tener el formato PascalCase"
             ]);
 
-            if (self::is_producction()) {
+            if (self::is_production()) {
                 self::set_error($error);
                 $error = self::get_generic_error();
             }
@@ -466,7 +499,7 @@ abstract class Route {
                 "error" => "El nombre del método «{$method_name}» es inválido"
             ]);
 
-            if (self::is_producction()) {
+            if (self::is_production()) {
                 self::set_error($error);
                 $error = self::get_generic_error();
             }
@@ -481,7 +514,7 @@ abstract class Route {
      *
      * @return boolean
      */
-    private static function is_producction(): bool {
+    public static function is_production(): bool {
         if (defined('DL_PRODUCTION')) {
             return constant('DL_PRODUCTION');
         }

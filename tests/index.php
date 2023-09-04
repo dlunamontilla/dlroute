@@ -3,9 +3,7 @@
 ini_set('display_errors', 1);
 
 use DLRoute\DLRoute;
-use DLRoute\Requests\DLRequest;
 use DLRoute\Server\DLServer;
-use DLRoute\Test\TestController;
 
 include dirname(__DIR__) . "/vendor/autoload.php";
 
@@ -21,22 +19,36 @@ $method = DLServer::get_method();
 
 
 // DLRoute::get('/una/ruta', [TestController::class, 'index']);
-DLRoute::get('/una/ruta', function(array $data) {
+DLRoute::get('/', function(object $params, array $data) {
     return [
-        "name" => "David Eduardo",
-        "lastname" => "Luna Montilla",
-        "uri" => DLServer::get_uri(),
-        "route" => DLServer::get_route()
+        "data" => $data,
+        "params" => $params
     ];
 });
 
-DLRoute::get('/otra/ruta', function(array $data) {
+DLRoute::get('/otra/ruta', function(object $params, array $vars) {
     return [
         "name" => "David Eduardo",
         "lastname" => "Luna Montilla"
     ];
 });
 
+DLRoute::get('/otra/parametro/{id}', function(object $params, array $data) {
+    return [
+        "name" => "David Eduardo",
+        "lastname" => "Luna Montilla",
+        "params" => $params
+    ];
+});
+
+DLRoute::get('/product/{user}/{uuid}', function(object $params, array $vars) {
+    return [
+        "name" => "David Eduardo",
+        "lastname" => "Luna Montilla",
+        "data" => $vars,
+        "params" => $params
+    ];
+});
 
 DLRoute::init();
 
