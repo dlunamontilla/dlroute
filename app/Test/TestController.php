@@ -3,12 +3,25 @@
 namespace DLRoute\Test;
 use DLRoute\Config\Controller;
 
+/**
+ * Es un controlador de prueba para verificar que el sistema
+ * de enrutamiento funcione correctamente.
+ * 
+ * @package DLRoute\Test
+ * 
+ * @version 0.0.1
+ * @author David E Luna M <davidlunamontilla@gmail.com>
+ * @copyright 2023 David E Luna M
+ * @license MIT
+ */
 final class TestController extends Controller {
 
-    public function index(array | object $data): array {
+    public function index(object $params, array $vars): array {
 
         return [
-            "data" => $data
+            "data" => $vars,
+            "params" => $params,
+            "request" => $this->request->get_values()
         ];
     }
 }

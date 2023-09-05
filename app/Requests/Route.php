@@ -1,6 +1,6 @@
 <?php
 
-namespace DLRoute\Config;
+namespace DLRoute\Requests;
 
 use DLRoute\Requests\DLOutput;
 use DLRoute\Server\DLServer;
