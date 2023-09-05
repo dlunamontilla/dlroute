@@ -110,6 +110,8 @@ class DLServer implements ServerInterface {
         $uri = self::get_uri();
         $uri = urldecode($uri);
 
+        self::remove_query($uri);
+
         /**
          * Nombre del script
          * 
@@ -167,5 +169,24 @@ class DLServer implements ServerInterface {
         }
 
         return $protocol;
+    }
+
+    /**
+     * Remueve las query de las URI.
+     *
+     * @param string $input Entrada a ser procesada
+     * @return void
+     */
+    private static function remove_query(string &$input): void {
+        /**
+         * Patrón de búsqueda de las query a ser removida.
+         * 
+         * @var string
+         */
+        $pattern = '\?(.*)$';
+
+        $input = trim($input);
+
+        $input = preg_replace("/{$pattern}/", '', $input);
     }
 }
