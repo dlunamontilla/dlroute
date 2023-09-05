@@ -56,7 +56,11 @@ Ejemplo de definición de rutas utilizando Array, cadenas de texto y `callbacks`
 Definición de rutas utilizando _array_:
 
 ```php
+use DLRoute\Requests\DLRoute;
+
 DLRoute::get('/home', [HomeController::class, 'index']);
+
+DLRoute::init();
 ```
 
 Definición de rutas utilizando cadenas de texto:
