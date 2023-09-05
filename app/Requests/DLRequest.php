@@ -155,6 +155,34 @@ class DLRequest implements RequestInterface {
             $request = json_decode($input, true);
         }
 
+        if (!is_null($request)) {
+            foreach ($request as &$value) {
+                
+                if (is_string($value)) {
+                    $value = trim($value);
+                }
+
+                if (is_numeric($value)) {
+                    $is_float = preg_match("/\./", $value);
+
+                    if ($is_float) {
+                        $value = (float) $value;
+                        continue;
+                    }
+
+                    $value = (int) $value;
+                }
+
+                if (strtolower($value) === "true") {
+                    $value = true;
+                }
+
+                if (strtolower($value) === "false") {
+                    $value = false;
+                }
+            }
+        }
+
         return !is_null($request) ? $request : trim($input);
     }
 
