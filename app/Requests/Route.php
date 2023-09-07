@@ -53,7 +53,7 @@ abstract class Route {
      *
      * @return void
      */
-    public static function init(): void {
+    public static function execute(): void {
         /**
          * Variables
          * 

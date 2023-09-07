@@ -24,5 +24,5 @@ DLRoute::post('/product/{id}', [TestController::class, 'index']);
 DLRoute::get('/product/{id}/{name}', [TestController::class, 'index']);
 
 
-DLRoute::init();
+DLRoute::execute();
 
