@@ -8,7 +8,7 @@ use DLRoute\Server\DLServer;
  * 
  * @package DLRoute
  * 
- * @version 0.0.0
+ * @version 1.0.0
  * @author David E Luna M <davidlunamontilla@gmail.com>
  * @copyright 2023 David E Luna M
  * @license MIT
