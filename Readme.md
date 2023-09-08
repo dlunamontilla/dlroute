@@ -48,6 +48,12 @@ Método PUT:
 DLRoute::put(string $uri, callable|array|string $controller): DLParamValueType;
 ```
 
+Método PATCH:
+
+```php
+DLRoute::patch(string $uri, callable|array|string $controller): DLParamValueType;
+```
+
 Método DELETE:
 
 ```php
