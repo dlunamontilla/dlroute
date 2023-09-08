@@ -328,4 +328,13 @@ abstract class DLParamValueType implements ParamTypeInterface {
 
         exit;
     }
+
+    /**
+     * Devuelve una instancia de esta clase.
+     *
+     * @return self
+     */
+    protected function get_param_instance(): self {
+        return $this;
+    }
 }

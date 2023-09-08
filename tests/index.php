@@ -20,19 +20,21 @@ DLRoute::get('/', function (object $params, array $data) {
 });
 
 
-DLRoute::get('/product/{id}', [TestController::class, 'index'])
-    ->filter_by_type([
-        "id" => "numeric"
-    ]);
+// DLRoute::get('/product/{id}', [TestController::class, 'index'])
+//     ->filter_by_type([
+//         "id" => "numeric"
+//     ]);
 
-DLRoute::get('/product/{id}/{name}', [TestController::class, 'index'])
-    ->filter_by_type([
-        "id" => "numeric",
-        "name" => "email"
-    ]);
+// DLRoute::get('/product/{id}/{name}', [TestController::class, 'index'])
+//     ->filter_by_type([
+//         "id" => "numeric",
+//         "name" => "email"
+//     ]);
 
-DLRoute::get('/test/{param}/name/{id}', function (object $params) {
+DLRoute::get('/test/{parametro}', function (object $params) {
     return $params;
-}); 
+})->filter_by_type([
+    "parametro" => "string"
+]);
 
 DLRoute::execute();

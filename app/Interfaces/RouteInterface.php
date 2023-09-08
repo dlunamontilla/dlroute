@@ -2,6 +2,8 @@
 
 namespace DLRoute\Interfaces;
 
+use DLRoute\Requests\DLParamValueType;
+
 interface RouteInterface {
 
     /**
@@ -13,7 +15,7 @@ interface RouteInterface {
      *
      * @param string $uri El patrón de URI que se comparará con las solicitudes entrantes.
      * @param callable|array|string $controller El callback o controlador encargado de manejar la solicitud.
-     * @return void
+     * @return DLParamValueType
      *
      * @example
      * ```
@@ -32,7 +34,7 @@ interface RouteInterface {
      * En el ejemplo anterior, cuando se realiza una solicitud GET a '/usuario/123', se invocará el método 'mostrar'
      * de la clase 'ControladorUsuario' para manejar la solicitud.
      */
-    public static function get(string $uri, callable|array|string $controller): self;
+    public static function get(string $uri, callable|array|string $controller): DLParamValueType;
 
     
     /**
@@ -44,7 +46,7 @@ interface RouteInterface {
      *
      * @param string $uri El patrón de URI que se comparará con las solicitudes entrantes.
      * @param callable|array|string $controller El callback o controlador encargado de manejar la solicitud.
-     * @return void
+     * @return DLParamValueType
      *
      * @example
      * ```
@@ -63,7 +65,7 @@ interface RouteInterface {
      * En el ejemplo anterior, cuando se realiza una solicitud GET a '/usuario/123', se invocará el método 'mostrar'
      * de la clase 'ControladorUsuario' para manejar la solicitud.
      */
-    public static function post(string $uri, callable|array|string $controller): self;
+    public static function post(string $uri, callable|array|string $controller): DLParamValueType;
 
     /**
      * Define una ruta para manejar solicitudes HTTP PUT.
@@ -74,7 +76,7 @@ interface RouteInterface {
      *
      * @param string $uri El patrón de URI que se comparará con las solicitudes entrantes.
      * @param callable|array|string $controller El callback o controlador encargado de manejar la solicitud.
-     * @return void
+     * @return DLParamValueType
      *
      * @example
      * ```
@@ -93,7 +95,7 @@ interface RouteInterface {
      * En el ejemplo anterior, cuando se realiza una solicitud GET a '/usuario/123', se invocará el método 'mostrar'
      * de la clase 'ControladorUsuario' para manejar la solicitud.
      */
-    public static function put(string $uri, callable|array|string $controller): self;
+    public static function put(string $uri, callable|array|string $controller): DLParamValueType;
 
     /**
      * Define una ruta para manejar solicitudes HTTP DELETE.
@@ -104,7 +106,7 @@ interface RouteInterface {
      *
      * @param string $uri El patrón de URI que se comparará con las solicitudes entrantes.
      * @param callable|array|string $controller El callback o controlador encargado de manejar la solicitud.
-     * @return void
+     * @return DLParamValueType
      *
      * @example
      * ```
@@ -123,5 +125,5 @@ interface RouteInterface {
      * En el ejemplo anterior, cuando se realiza una solicitud GET a '/usuario/123', se invocará el método 'mostrar'
      * de la clase 'ControladorUsuario' para manejar la solicitud.
      */
-    public static function delete(string $uri, callable|array|string $controller): self;
+    public static function delete(string $uri, callable|array|string $controller): DLParamValueType;
 }
