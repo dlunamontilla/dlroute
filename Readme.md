@@ -4,10 +4,12 @@
 
 Actualmente, permite filtrar por tipos de datos o expresiones regulares, tema que veremos más abajo.
 
+Por otra parte, no solamente soporta el envío de formularios, también de contenido en formato JSON directamente en el cuerpo (`body`).
+
 ## Características
 
 - Definición de rutas simples y complejas.
-- Manejo de diferentes métodos `HTTP` como `GET`, `POST`, `DELETE`, etc.
+- Manejo de diferentes métodos `HTTP` como `GET`, `POST`, `PUT`, `PATCH` y `DELETE`, etc.
 - Parámetros variables en las rutas.
 - Permite establecer el tipo de datos que se espera en el parámetros, así como el uso de las expresiones regulares.
 - Uso de controladores y `callbacks` para manejar las rutas.
@@ -201,6 +203,10 @@ Route::get('/ruta/{parametro}', function (object $params) {
 Recuerda, que `$params` se está retornando como ejemplo, pero puede retornar cualquier cosa allí. Lo que retorne allí será vista por el usuario final.
 
 Si retorna un array u objeto (caso de `$params`) la salida devuelta será en formato JSON.
+
+> **Importante:**
+>
+> El ejemplo que se hizo con el método `HTTP GET` es aplicable a todos los demás métodos de envío. Es exactamente igual. Lo único que cambia es el nombre del método de la clase `DLRoute` para indicar el método de envío.
 
 ## Este es otro tema que nada tiene que ver con el proyecto
 
