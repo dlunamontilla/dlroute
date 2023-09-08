@@ -33,25 +33,25 @@ Para comenzar a utilizar `DLRoute`, sigue estos pasos:
 Método GET:
 
 ```php
-DLRoute::get(string $uri, callable|array|string $controller): DLRoute;
+DLRoute::get(string $uri, callable|array|string $controller): DLParamValueType;
 ```
 
 Método POST:
 
 ```php
-DLRoute::post(string $uri, callable|array|string $controller): DLRoute;
+DLRoute::post(string $uri, callable|array|string $controller): DLParamValueType;
 ```
 
 Método PUT:
 
 ```php
-DLRoute::put(string $uri, callable|array|string $controller): DLRoute;
+DLRoute::put(string $uri, callable|array|string $controller): DLParamValueType;
 ```
 
 Método DELETE:
 
 ```php
-DLRoute::delete(string $uri, callable|array|string $controller): DLRoute;
+DLRoute::delete(string $uri, callable|array|string $controller): DLParamValueType;
 ```
 
 > Tome en cuenta que para hacer funcionar las rutas, es decir, que ejecuten el controlador debe colocar al final de todas las rutas la siguiente línea:
