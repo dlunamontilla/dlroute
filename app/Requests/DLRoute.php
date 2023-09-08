@@ -55,6 +55,17 @@ class DLRoute extends Route implements RouteInterface {
         return self::get_instance();
     }
 
+    public static function patch(string $uri, callable|array|string $controller, array|object $data = [], ?string $mime_type = null): DLParamValueType {
+
+        if (!DLServer::is_patch()) {
+            return self::get_instance();
+        }
+
+        self::request($uri, $controller, 'PATCH', $data, $mime_type);
+
+        return self::get_instance();
+    }
+
     public static function delete(string $uri, callable|array|string $controller, array|object $data = [], ?string $mime_type = null): DLParamValueType {
 
         if (!DLServer::is_delete()) {

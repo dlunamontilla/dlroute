@@ -92,6 +92,13 @@ interface ServerInterface {
     public static function is_put(): bool;
 
     /**
+     * Determina si el método de envío HTTP es PATCH.
+     *
+     * @return boolean
+     */
+    public static function is_patch(): bool;
+
+    /**
      * Determina si el método de envío HTTP es DELETE.
      *
      * @return boolean

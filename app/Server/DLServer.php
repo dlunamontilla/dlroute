@@ -86,6 +86,10 @@ class DLServer implements ServerInterface {
         return self::get_method() === "PUT";
     }
 
+    public static function is_patch(): bool {
+        return self::get_method() === "PATCH";
+    }
+
     public static function is_delete(): bool {
         return self::get_method() === "DELETE";
     }
