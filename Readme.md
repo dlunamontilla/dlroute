@@ -207,15 +207,3 @@ Si retorna un array u objeto (caso de `$params`) la salida devuelta será en for
 > **Importante:**
 >
 > El ejemplo que se hizo con el método `HTTP GET` es aplicable a todos los demás métodos de envío. Es exactamente igual. Lo único que cambia es el nombre del método de la clase `DLRoute` para indicar el método de envío.
-
-## Este es otro tema que nada tiene que ver con el proyecto
-
-Tomar en cuenta en CSS:
-
-```css
-@property --rotate {
-  syntax: "<angle>";
-  initial-value: 132deg;
-  inherits: false;
-}
-```
