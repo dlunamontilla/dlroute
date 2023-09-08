@@ -19,7 +19,7 @@ class DLRoute extends Route implements RouteInterface {
 
     private function __construct() {}
 
-    public static function get(string $uri, callable|array|string $controller, array|object $data = [], ?string $mime_type = null): self|null {
+    public static function get(string $uri, callable|array|string $controller, array|object $data = [], ?string $mime_type = null): self {
         self::$route = $uri;
 
         if (!DLServer::is_get()) {
@@ -31,30 +31,36 @@ class DLRoute extends Route implements RouteInterface {
         return self::get_instance();
     }
 
-    public static function post(string $uri, callable|array|string $controller, array|object $data = [], ?string $mime_type = null): void {
+    public static function post(string $uri, callable|array|string $controller, array|object $data = [], ?string $mime_type = null): self {
         if (!DLServer::is_post()) {
-            return;
+            return self::get_instance();
         }
 
         self::request($uri, $controller, 'POST', $data, $mime_type);
+
+        return self::get_instance();        
     }
 
-    public static function put(string $uri, callable|array|string $controller, array|object $data = [], ?string $mime_type = null): void {
+    public static function put(string $uri, callable|array|string $controller, array|object $data = [], ?string $mime_type = null): self {
 
         if (!DLServer::is_put()) {
-            return;
+            return self::get_instance();
         }
 
         self::request($uri, $controller, 'PUT', $data, $mime_type);
+
+        return self::get_instance();
     }
 
-    public static function delete(string $uri, callable|array|string $controller, array|object $data = [], ?string $mime_type = null): void {
+    public static function delete(string $uri, callable|array|string $controller, array|object $data = [], ?string $mime_type = null): self {
 
         if (!DLServer::is_delete()) {
-            return;
+            return self::get_instance();
         }
 
         self::request($uri, $controller, 'DELETE', $data, $mime_type);
+
+        return self::get_instance();
     }
 
     /**

@@ -32,7 +32,7 @@ interface RouteInterface {
      * En el ejemplo anterior, cuando se realiza una solicitud GET a '/usuario/123', se invocará el método 'mostrar'
      * de la clase 'ControladorUsuario' para manejar la solicitud.
      */
-    public static function get(string $uri, callable|array|string $controller): self|null;
+    public static function get(string $uri, callable|array|string $controller): self;
 
     
     /**
@@ -63,7 +63,7 @@ interface RouteInterface {
      * En el ejemplo anterior, cuando se realiza una solicitud GET a '/usuario/123', se invocará el método 'mostrar'
      * de la clase 'ControladorUsuario' para manejar la solicitud.
      */
-    public static function post(string $uri, callable|array|string $controller): void;
+    public static function post(string $uri, callable|array|string $controller): self;
 
     /**
      * Define una ruta para manejar solicitudes HTTP PUT.
@@ -93,7 +93,7 @@ interface RouteInterface {
      * En el ejemplo anterior, cuando se realiza una solicitud GET a '/usuario/123', se invocará el método 'mostrar'
      * de la clase 'ControladorUsuario' para manejar la solicitud.
      */
-    public static function put(string $uri, callable|array|string $controller): void;
+    public static function put(string $uri, callable|array|string $controller): self;
 
     /**
      * Define una ruta para manejar solicitudes HTTP DELETE.
@@ -123,5 +123,5 @@ interface RouteInterface {
      * En el ejemplo anterior, cuando se realiza una solicitud GET a '/usuario/123', se invocará el método 'mostrar'
      * de la clase 'ControladorUsuario' para manejar la solicitud.
      */
-    public static function delete(string $uri, callable|array|string $controller): void;
+    public static function delete(string $uri, callable|array|string $controller): self;
 }
