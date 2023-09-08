@@ -7,7 +7,19 @@ use DLRoute\Server\DLServer;
 
 trait RouteParams {
 
+    /**
+     * Parámetros de la petición.
+     *
+     * @var object|null
+     */
     protected static ?object $params = null;
+
+    /**
+     * Captura la ruta con parámetro actual
+     *
+     * @var array
+     */
+    protected static array $current_param = [];
 
     /**
      * Procesa las rutas y extrae de ellas sus parámetros.
@@ -47,6 +59,7 @@ trait RouteParams {
         $param_exists = self::assign_param_value($route_parts);
 
         if ($param_exists) {
+            self::$current_param[$current_route] = $route;
             $route = $current_route;
         }
     }

@@ -12,7 +12,7 @@ include dirname(__DIR__) . "/vendor/autoload.php";
  * enrutamiento.
  */
 
-DLRoute::get('/', function(object $params, array $data) {
+DLRoute::get('/', function (object $params, array $data) {
     return [
         "data" => $data,
         "params" => $params
@@ -20,9 +20,19 @@ DLRoute::get('/', function(object $params, array $data) {
 });
 
 
-DLRoute::post('/product/{id}', [TestController::class, 'index']);
-DLRoute::get('/product/{id}/{name}', [TestController::class, 'index']);
+DLRoute::get('/product/{id}', [TestController::class, 'index'])
+    ->filter_by_type([
+        "id" => "numeric"
+    ]);
 
+DLRoute::get('/product/{id}/{name}', [TestController::class, 'index'])
+    ->filter_by_type([
+        "id" => "numeric",
+        "name" => "email"
+    ]);
+
+DLRoute::get('/test/{param}/name/{id}', function (object $params) {
+    return $params;
+}); 
 
 DLRoute::execute();
-

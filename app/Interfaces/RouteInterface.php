@@ -32,7 +32,7 @@ interface RouteInterface {
      * En el ejemplo anterior, cuando se realiza una solicitud GET a '/usuario/123', se invocará el método 'mostrar'
      * de la clase 'ControladorUsuario' para manejar la solicitud.
      */
-    public static function get(string $uri, callable|array|string $controller): void;
+    public static function get(string $uri, callable|array|string $controller): self|null;
 
     
     /**

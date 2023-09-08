@@ -5,7 +5,7 @@ namespace DLRoute\Requests;
 use DLRoute\Requests\DLOutput;
 use DLRoute\Server\DLServer;
 
-abstract class Route {
+abstract class Route extends DLParamValueType{
     use RouteParams;
 
     /**
@@ -53,7 +53,7 @@ abstract class Route {
      *
      * @return void
      */
-    public static function execute(): void {
+    public static function run(): void {
         /**
          * Variables
          * 
@@ -91,15 +91,7 @@ abstract class Route {
 
 
         if (is_null($controller)) {
-            self::response_code(404);
-
-            echo DLOutput::get_json([
-                "code" => 404,
-                "route" => $route,
-                "message" => "Página «{$route}» no encontrada"
-            ], true);
-
-            return;
+            DLOutput::not_found();
         }
 
         if (is_string($controller)) {
@@ -118,6 +110,8 @@ abstract class Route {
 
         $output->set_content($data);
         $output->print_response_data($mime_type);
+
+        exit;
     }
 
     /**

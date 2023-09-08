@@ -3,6 +3,7 @@
 namespace DLRoute\Requests;
 
 use DLRoute\Interfaces\OutputInterface;
+use DLRoute\Server\DLServer;
 
 class DLOutput implements OutputInterface {
 
@@ -75,6 +76,25 @@ class DLOutput implements OutputInterface {
 
 
         return trim($stringData);
+    }
+
+    public static function not_found(): void {
+        header("Content-Type: application/json; charset=utf-8", true, 404);
+
+        /**
+         * Ruta actual de la petición.
+         * 
+         * @var string
+         */
+        $route = DLServer::get_route();
+
+        echo DLOutput::get_json([
+            "code" => 404,
+            "route" => $route,
+            "message" => "No encontrado"
+        ], true);
+
+        exit;
     }
 
     /**

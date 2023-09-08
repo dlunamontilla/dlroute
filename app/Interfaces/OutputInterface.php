@@ -37,4 +37,12 @@ interface OutputInterface {
      * @return string La cadena de texto en formato JSON resultante.
      */
     public static function get_json(object | array $content, bool $pretty = false): string;
+
+    /**
+     * Undocumented function
+     *
+     * @param integer $code
+     * @return void
+     */
+    public static function not_found(): void;
 }

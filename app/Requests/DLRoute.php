@@ -17,15 +17,18 @@ use DLRoute\Server\DLServer;
 class DLRoute extends Route implements RouteInterface {
     private static ?self $instance = null;
 
-    public function __construct() {}
+    private function __construct() {}
 
-    public static function get(string $uri, callable|array|string $controller, array|object $data = [], ?string $mime_type = null): void {
-        
+    public static function get(string $uri, callable|array|string $controller, array|object $data = [], ?string $mime_type = null): self|null {
+        self::$route = $uri;
+
         if (!DLServer::is_get()) {
-            return;
+            return self::get_instance();
         }
 
         self::request($uri, $controller, 'GET', $data, $mime_type);
+        
+        return self::get_instance();
     }
 
     public static function post(string $uri, callable|array|string $controller, array|object $data = [], ?string $mime_type = null): void {
@@ -54,7 +57,79 @@ class DLRoute extends Route implements RouteInterface {
         self::request($uri, $controller, 'DELETE', $data, $mime_type);
     }
 
-    private static function register_uri(string $uri): void {
+    /**
+     * Corre el sistema de rutas.
+     * 
+     * @return void
+     */
+    public static function execute(): void {
+        /**
+         * Instancia de esta clase.
+         * 
+         * @var self
+         */
+        $instance = self::$instance;
+
+        /**
+         * Filtros creados por el usuario desarrollador.
+         * 
+         * @var array
+         */
+        $filters = $instance->get_filters();
+
+        /**
+         * Método HTTP actual de ejecución
+         * 
+         * @var string
+         */
         $method = DLServer::get_method();
+
+        /**
+         * Ruta HTTP actual de ejecución.
+         * 
+         * @var string
+         */
+        $route = DLServer::get_route();
+
+        /**
+         * Ruta actual registrada.
+         * 
+         * @var string
+         */
+        $registered_current_route = self::$current_param[$route] ?? null;
+
+        /**
+         * Permite indicar si hay un filtro o no.
+         * 
+         * @var boolean
+         */
+        $without_filters = is_null(self::$params) ||
+            is_null($registered_current_route) ||
+            !array_key_exists($method, $filters) ||
+            !array_key_exists($registered_current_route, $filters[$method]);
+
+        if ($without_filters) {
+            self::run();
+        }
+
+        /**
+         * Filtros actuales
+         * 
+         * @var array
+         */
+        $current_filters = $filters[$method][$registered_current_route];
+        
+        $instance->filter_param($current_filters, self::$params);
+
+        echo "\n-----------------------------------";
+        self::run();
+    }
+
+    private static function get_instance(): self {
+        if (!(self::$instance instanceof self)) {
+            self::$instance = new self;
+        }
+
+        return self::$instance;
     }
 }

@@ -5,20 +5,42 @@ namespace DLRoute\Interfaces;
 interface ParamTypeInterface {
 
     /**
-     * Selecciona el campo a ser filtrado por una expresión regular o tipo.
+     * Filtra los parámetros con expresiones regulares o nombres de tipos.
      *
-     * @param string $field
-     * @return self
-     */
-    public function field(string $field): self;
-
-    /**
-     * Filtra el valor de cada campo en función de la expresión regular indicada
-     * en el primer parámetro.
-     *
-     * @param string $regex Expresión regular a usar para filtrar valor.
-     * @param string $flag Banderas de la expresión regular.
+     * Por ejemplo, se puede usar de la siguiente forma:
+     * 
+     * ```
+     *  use DLRoute\Requests\DLRoute as Route;
+     *  
+     *  Route::get('/ruta/con/{parametro}', [TestController::class, 'method'])
+     *      ->filter_by_type([
+     *          "parametro" => "/^[a-f0-9]+$/i"
+     *      ]);
+     * ``` 
+     * 
+     * Donde la expresión regular anterior valida un hash alfanumérico de 0 a f de cualquier
+     * longitud a partir de 1 carácter.
+     * 
+     * También puede indicar el tipo de datos, por ejemplo:
+     * 
+     * ```
+     *  use DLRoute\Requests\DLRoute as Route;
+     *  
+     *  Route::get('/ruta/con/{parametro}', [TestController::class, 'method'])
+     *      ->filter_by_type([
+     *          "parametro" => "integer | float"
+     *      ]);
+     * ``` 
+     * 
+     * @param array $params Parámetros a ser filtrados con expresiones regulares.
      * @return void
      */
-    public function filter_value(string $regex = "(.*?)", string $flag = ''): void;
+    public function filter_by_type(array $params): void;
+
+    /**
+     * Devuelve los filtros establecidos por el desarrollador.
+     *
+     * @return array
+     */
+    public function get_filters(): array;
 }
