@@ -35,6 +35,9 @@ class FileInfo implements FileInfoInterface {
      * @return boolean
      */
     public static function is_image(string $filename): bool {
+        $pattern = "/^image\/(.*?)$/i";
+
+        
         /**
          * Tipo de archivo.
          * 

@@ -4,6 +4,7 @@ namespace DLRoute\Config;
 
 use DLRoute\Requests\DLOutput;
 use DLRoute\Requests\DLRequest;
+use DLRoute\Requests\DLUpload;
 use DLRoute\Server\DLServer;
 
 /**
@@ -18,6 +19,8 @@ use DLRoute\Server\DLServer;
  */
 abstract class Controller {
 
+    use DLUpload;
+    
     /**
      * Procesa las peticiones del usuario.
      *

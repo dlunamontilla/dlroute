@@ -12,30 +12,41 @@ include dirname(__DIR__) . "/vendor/autoload.php";
  * enrutamiento.
  */
 
-DLRoute::get('/', function (object $params, array $data) {
-    return [
-        "data" => $data,
-        "params" => $params
-    ];
-});
+// DLRoute::get('/', function (object $params, array $data) {
+//     return [
+//         "data" => $data,
+//         "params" => $params
+//     ];
+// });
 
 
-DLRoute::get('/product/{id}', [TestController::class, 'index'])
+// DLRoute::post('/product/{id}', [TestController::class, 'index'])
+//     ->filter_by_type([
+//         "id" => ""
+//     ]);
+
+// DLRoute::get('/product/{id}/{name}', [TestController::class, 'index'])
+//     ->filter_by_type([
+//         "id" => "numeric",
+//         "name" => "email"
+//     ]);
+
+// DLRoute::patch('/test/{parametro}', function (object $params) {
+//     return $params;
+// })->filter_by_type([
+//     "parametro" => "integer"
+// ]);
+
+// DLRoute::put('/user/{id}/{email}', [TestController::class, 'index'])->filter_by_type([
+//     "id" => "integer",
+//     "email" => "email"
+// ]);
+
+DLRoute::get('/user/{parametro}', [TestController::class, 'index'])
     ->filter_by_type([
-        "id" => "numeric"
+        "parametro" => 'numeric'
     ]);
 
-DLRoute::get('/product/{id}/{name}', [TestController::class, 'index'])
-    ->filter_by_type([
-        "id" => "numeric",
-        "name" => "email"
-    ]);
-
-DLRoute::patch('/test/{parametro}', function (object $params) {
-    return $params;
-})->filter_by_type([
-    "parametro" => "uuid"
-]);
+DLRoute::post('/test/file', [TestController::class, 'index']);
 
 DLRoute::execute();
-

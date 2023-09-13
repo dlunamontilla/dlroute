@@ -17,11 +17,17 @@ use DLRoute\Config\Controller;
 final class TestController extends Controller {
 
     public function index(object $params, array $vars): array {
+        $filenames = $this->upload_file('file', '*/*');
 
         return [
             "data" => $vars,
             "params" => $params,
-            "request" => $this->request->get_values()
+            "request" => $this->request->get_values(),
+            "filenames" => (array) $filenames,
+            "files" => $_FILES
         ];
     }
 }
+
+// $info = new \finfo;
+// $type = $info->file();
