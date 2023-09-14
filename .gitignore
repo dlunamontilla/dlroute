@@ -11,4 +11,5 @@ vendor
 # Ignorar el directorio de subida de archivos:
 uploads
 
+# Directorio public
 public

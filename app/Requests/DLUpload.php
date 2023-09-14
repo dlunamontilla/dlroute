@@ -4,7 +4,10 @@ namespace DLRoute\Requests;
 
 use DLRoute\Routes\RouteDebugger;
 use DLRoute\Server\DLServer;
+use Error;
+use Exception;
 use finfo;
+use GdImage;
 
 /**
  * MIT License
@@ -55,6 +58,13 @@ trait DLUpload {
     private string $basedir = "";
 
     /**
+     * Anchura predeterminada del thumbnail.
+     *
+     * @var integer
+     */
+    private int $thumbnail_width = 300;
+
+    /**
      * Sube los archivos al servidor.
      *
      * @param string $field Campo del formulario.
@@ -87,7 +97,7 @@ trait DLUpload {
     protected function get_filenames(): array {
         return $this->filenames;
     }
-    
+
     /**
      * Permite establecer un directorio base dónde guardar los archivos.
      *
@@ -96,6 +106,17 @@ trait DLUpload {
      */
     protected function set_basedir(string $basedir): void {
         $this->basedir = RouteDebugger::clear_route($basedir);
+    }
+
+    /**
+     * Permite establecer una anchura personalizada a los
+     * `thumbnails` que se generarán.
+     *
+     * @param integer $width Anchura de los `thumbnails`.
+     * @return void
+     */
+    protected function set_thumbnail_width(int $width): void {
+        $this->thumbnail_width = $width;
     }
 
     /**
@@ -302,7 +323,9 @@ trait DLUpload {
                     "readable_size" => $readable_size,
                     "error" => $error,
                     "basedir" =>  $this->basedir,
-                    "target" => "{$basedir}/{$name}"
+                    "target" => "{$basedir}/{$name}",
+                    "relative_path" => $this->get_relative_basedir(),
+                    "relative_thumbnail_path" => $this->get_relative_basedir() . "/thumbnail",
                 ];
             }
 
@@ -378,7 +401,9 @@ trait DLUpload {
             "readable_size" => $readable_size,
             "error" => $error,
             "basedir" => $this->basedir,
-            "target" => "{$basedir}/{$name}"
+            "target" => "{$basedir}/{$name}",
+            "relative_path" => $this->get_relative_basedir(),
+            "relative_thumbnail_path" => $this->get_relative_basedir() . "/thumbnail",
         ];
 
         return $filenames;
@@ -627,6 +652,10 @@ trait DLUpload {
             $filename .= ".{$extension}";
         }
 
+        if ($mime_type === 'image/x-ms-bmp') {
+            $mime_type = $type;
+        }
+
         if ($type !== $mime_type) {
             $filename = str_replace(".{$extension}", '', $filename);
             $filename .= ".{$subcategory}";
@@ -717,9 +746,9 @@ trait DLUpload {
      * @param array $filenames
      * @return void
      */
-    private function move_uploaded(array $filenames): void {
+    private function move_uploaded(array &$filenames): void {
 
-        foreach ($filenames as $file) {
+        foreach ($filenames as &$file) {
             if (!is_array($file)) {
                 continue;
             }
@@ -728,11 +757,43 @@ trait DLUpload {
 
             move_uploaded_file($file->tmp_name, $file->target);
 
-            $this->resize_image($file->target, $file->type);
+            /**
+             * Ruta de la vista en miniatura de la imagen original si la vista
+             * en miniatura se ha creaddo, caso contrario, valdrá null.
+             * 
+             * @var string|null
+             */
+            $thumbnail = $this->resize_image($file->target, $file->type);
+
+            $file->thumbnail = $thumbnail;
+
+            /**
+             * Partes de la ruta relativa de la imagen en miniatura.
+             * 
+             * @var string[]
+             */
+            $route_parts_thumbnail = [];
+
+            $file->relative_thumbnail = null;
+
+            if (is_null($thumbnail)) {
+                continue;
+            }
+
+            $route_parts_thumbnail = explode("/", $thumbnail);
+
+            /**
+             * Nombre del archivo thumbnail.
+             * 
+             * @var string
+             */
+            $filename = array_pop($route_parts_thumbnail);
+
+            $file->relative_thumbnail = "{$file->relative_thumbnail_path}/{$filename}";
         }
     }
 
-     /**
+    /**
      * Sanea el código SVG para evitar la ejecución de código JavaScript no deseada.
      *
      * @param string $content
@@ -759,7 +820,7 @@ trait DLUpload {
          * @var string
          */
         $js_events_pattern = '/(\b((?<!-)on\w+=\"?(.*)\"?)|\b((?<!-)on\w+=\'?(.*)\'?))/i';
-        
+
         /**
          * Patrón de búsqueda de atributos.
          * 
@@ -801,7 +862,7 @@ trait DLUpload {
          * @var string
          */
         $php_pattern = '/<\?(php)?|\?>/i';
-        
+
         /**
          * Contenido a ser depurado.
          * 
@@ -822,7 +883,7 @@ trait DLUpload {
          * @var boolean
          */
         $xml_exists = preg_match($xml_pattern, $content);
-        
+
         $content = preg_replace($script_block_pattern, '', $content);
         $content = preg_replace($script_pattern, '', $content);
         $content = preg_replace($style_block_pattern, '', $content);
@@ -894,16 +955,27 @@ trait DLUpload {
     }
 
     /**
-     * Cambia el tamaño de las imágenes
+     * Determina si la imagen enviada es un formato Webp
+     *
+     * @param string $mime_type Tipo MIME de archivo.
+     * @return boolean
+     */
+    private function is_webp(string $mime_type): bool {
+        return $mime_type === 'image/webp';
+    }
+
+    /**
+     * Cambia el tamaño de las imágenes y devuelve la ruta de la vista previa, 
+     * caso contrario, devuelve `NULL`.
      *
      * @param string $filename Archivo a ser analizado y procesado.
      * @param string $mime_type Indica el tipo a ser analizado.
-     * @return void
+     * @return string|null
      */
-    private function resize_image(string $filename, string $mime_type): void {
+    private function resize_image(string $filename, string $mime_type): string|null {
 
         if (!file_exists($filename)) {
-            return;
+            return null;
         }
 
         $mime_type = trim($mime_type);
@@ -923,7 +995,7 @@ trait DLUpload {
         $is_image = preg_match($pattern, $mime_type);
 
         if (!$is_image) {
-            return;
+            return null;
         }
 
         /**
@@ -934,7 +1006,7 @@ trait DLUpload {
         $info = getimagesize($filename);
 
         if ($info === FALSE) {
-            return;
+            return null;
         }
 
         /**
@@ -945,7 +1017,11 @@ trait DLUpload {
         $is_available = array_key_exists(0, $info) && array_key_exists(1, $info);
 
         if (!$is_available) {
-            return;
+            return null;
+        }
+
+        if (!class_exists('GdImage')) {
+            return null;
         }
 
         /**
@@ -967,15 +1043,15 @@ trait DLUpload {
          * 
          * @var integer
          */
-        $new_width = 300;
-        
+        $thumbnail_width = $this->thumbnail_width;
+
         /**
          * Se establece la altura automáticamente en función de la anchura
          * original del archivo.
          * 
          * @var float
          */
-        $new_height = (float) $new_width / $width * $height;
+        $thumbnail_height = (float) $thumbnail_width / $width * $height;
 
         /**
          * Directorio base donde se almacenarán las miniaturas.
@@ -984,8 +1060,144 @@ trait DLUpload {
          */
         $dir = dirname($filename) . "/thumbnail";
 
-        if ($this->is_jpeg($mime_type)) {
-            echo DLOutput::get_json($info, true);
+        if (file_exists($dir) && !is_dir($dir)) {
+            unlink($dir);
         }
+
+        if (!file_exists($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        /**
+         * Imagen creada a partir de un fichero o ruta.
+         * 
+         * @var GdImage|resource|false
+         */
+        $image = false;
+
+        if ($this->is_jpeg($mime_type)) {
+            $image = imagecreatefromjpeg($filename);
+        }
+
+        if ($this->is_png($mime_type)) {
+            $image = imagecreatefrompng($filename);
+        }
+
+        if ($this->is_gif($mime_type)) {
+            $image = imagecreatefromgif($filename);
+        }
+
+        if ($this->is_bitmap($mime_type)) {
+            $image = @imagecreatefrombmp($filename);
+        }
+
+        if ($this->is_webp($mime_type)) {
+            $image = imagecreatefromwebp($filename);
+        }
+
+        /**
+         * Indica si `$image` es un recurso o no.
+         * 
+         * @var boolean
+         */
+        $is_resource = is_resource($image) || ($image instanceof GdImage);
+
+        if (!$is_resource) {
+            return null;
+        }
+
+        /**
+         * Nueva imagen creada a partir de la original con otras dimensiones.
+         * 
+         * @var GdImage|resource|false
+         */
+        $new_image = imagecreatetruecolor($thumbnail_width, $thumbnail_height);
+
+        $is_resource = is_resource($new_image) || ($new_image instanceof GdImage);
+
+        if (!$is_resource) {
+            return null;
+        }
+
+        imagecopyresampled($new_image, $image, 0, 0, 0, 0, $thumbnail_width, $thumbnail_height, imagesx($image), imagesy($image));
+
+        /**
+         * Ruta completa del thumbnail.
+         * 
+         * @var string
+         */
+        $thumbnail_file = preg_replace('/\b[0-9]{2}\//', "$0thumbnail/", $filename);
+        $thumbnail_file = preg_replace('/\.(.*?)$/i', '', $thumbnail_file);
+        $thumbnail_file .= ".webp";
+
+        /**
+         * Indica si se ha creado la imagen en la ruta indicada.
+         * 
+         * @var boolean
+         */
+        $it_created = @imagewebp($new_image, $thumbnail_file);
+
+        if ($it_created) {
+            imagedestroy($image);
+            imagedestroy($new_image);
+        }
+
+        return $it_created ? $thumbnail_file : null;
+    }
+
+    /**
+     * Devuelve la ruta de directorio de archivos por fecha de ejecución
+     * del servidor.
+     *
+     * @return string
+     */
+    private function get_dir_by_date(): string {
+        /**
+         * Año del actual del servidor de ejecución.
+         * 
+         * @var string
+         */
+        $year = date('Y');
+
+        /**
+         * Mes actual de ejecución del servidor.
+         * 
+         * @var string
+         */
+        $month = date('m');
+
+        return "{$year}/{$month}";
+    }
+
+    /**
+     * Devuelve la ruta relativa de los archivos.
+     *
+     * @return string
+     */
+    private function get_relative_basedir(): string {
+        /**
+         * Partes de una ruta base.
+         * 
+         * @var string[]
+         */
+        $route_parts = explode("/", $this->basedir);
+
+        array_shift($route_parts);
+
+        /**
+         * Devuelve la ruta de directorio en función de la fecha.
+         * 
+         * @var string
+         */
+        $dir_by_date = $this->get_dir_by_date();
+
+        /**
+         * Directorio base relativo.
+         * 
+         * @var string
+         */
+        $relative_basedir = join("/", $route_parts) . "/{$dir_by_date}";
+
+        return RouteDebugger::trim_slash($relative_basedir);
     }
 }
