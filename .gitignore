@@ -1,4 +1,12 @@
+# Directorio de bibliotecas o plugins:_
 node_modules
 vendor
+
+# Archivos SQL.
 *.sql
+
+# Variables de entorno.
 .env
+
+# Ignorar el directorio de subida de archivos:
+uploads

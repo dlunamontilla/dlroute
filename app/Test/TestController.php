@@ -16,18 +16,43 @@ use DLRoute\Config\Controller;
  */
 final class TestController extends Controller {
 
-    public function index(object $params, array $vars): array {
-        $filenames = $this->upload_file('file', '*/*');
+    /**
+     * Función principal de ejecución del controlador.
+     *
+     * @param object $params Parámetros de la ruta parametrizadas.
+     * @param array $vars Opcional. Variables a usar en el motor de plantillas.
+     * @return array
+     */
+    public function index(object $params, array $vars = []): array {
+        /**
+         * Nombre de campo de archivos
+         * 
+         * @var string
+         */
+        $file = 'file';
+
+        /**
+         * Tipo MIME de archivo a filtrar. Se analiza su contenido, en lugar, de
+         * su extensión.
+         * 
+         * @var string
+         */
+        $mime_type = '*/*';
+
+        $this->set_basedir('/public/uploads');
+
+        /**
+         * Nombre de archivos.
+         * 
+         * @var array
+         */
+        $filenames = $this->upload_file($file, $mime_type);
 
         return [
-            "data" => $vars,
+            "vars" => $vars,
             "params" => $params,
             "request" => $this->request->get_values(),
-            "filenames" => (array) $filenames,
-            "files" => $_FILES
+            "filenames" => $filenames
         ];
     }
 }
-
-// $info = new \finfo;
-// $type = $info->file();

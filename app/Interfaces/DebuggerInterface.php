@@ -5,7 +5,8 @@ namespace DLRoute\Interfaces;
 interface DebuggerInterface {
 
     /**
-     * Depura y limpia las rutas.
+     * Depura y limpia las rutas. Si las rutas contienen más de dos slash (/) seguidas,
+     * entonces, removerá las sobrantes y dejará una por cada separación de directorios.
      *
      * @param string $route
      * @return string
