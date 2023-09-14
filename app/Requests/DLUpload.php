@@ -727,6 +727,8 @@ trait DLUpload {
             $file = (object) $file;
 
             move_uploaded_file($file->tmp_name, $file->target);
+
+            $this->resize_image($file->target, $file->type);
         }
     }
 
@@ -888,6 +890,102 @@ trait DLUpload {
      * @return boolean
      */
     private function is_bitmap(string $mime_type): bool {
-        return $mime_type === "image/bmp";
+        return $mime_type === "image/bmp" || $mime_type === "image/x-ms-bmp";
+    }
+
+    /**
+     * Cambia el tamaño de las imágenes
+     *
+     * @param string $filename Archivo a ser analizado y procesado.
+     * @param string $mime_type Indica el tipo a ser analizado.
+     * @return void
+     */
+    private function resize_image(string $filename, string $mime_type): void {
+
+        if (!file_exists($filename)) {
+            return;
+        }
+
+        $mime_type = trim($mime_type);
+
+        /**
+         * Patrón de búsqueda de formatos de imágenes.
+         * 
+         * @var  string
+         */
+        $pattern = "/^image\/(.*?)$/i";
+
+        /**
+         * Valida si el archivo es una imagen.
+         * 
+         * @var boolean
+         */
+        $is_image = preg_match($pattern, $mime_type);
+
+        if (!$is_image) {
+            return;
+        }
+
+        /**
+         * Información de la imagen.
+         * 
+         * @var array|false
+         */
+        $info = getimagesize($filename);
+
+        if ($info === FALSE) {
+            return;
+        }
+
+        /**
+         * Comprueba si las proporciones están disponibles.
+         * 
+         * @var boolean
+         */
+        $is_available = array_key_exists(0, $info) && array_key_exists(1, $info);
+
+        if (!$is_available) {
+            return;
+        }
+
+        /**
+         * Anchura original de la imagen.
+         * 
+         * @var integer
+         */
+        $width = (int) $info[0];
+
+        /**
+         * Altura original de la imagen.
+         * 
+         * @var integer
+         */
+        $height = (int) $info[1];
+
+        /**
+         * Nueva anchura establecida para miniaturas.
+         * 
+         * @var integer
+         */
+        $new_width = 300;
+        
+        /**
+         * Se establece la altura automáticamente en función de la anchura
+         * original del archivo.
+         * 
+         * @var float
+         */
+        $new_height = (float) $new_width / $width * $height;
+
+        /**
+         * Directorio base donde se almacenarán las miniaturas.
+         * 
+         * @var string
+         */
+        $dir = dirname($filename) . "/thumbnail";
+
+        if ($this->is_jpeg($mime_type)) {
+            echo DLOutput::get_json($info, true);
+        }
     }
 }
