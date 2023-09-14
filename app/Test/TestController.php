@@ -39,7 +39,7 @@ final class TestController extends Controller {
          */
         $mime_type = '*/*';
 
-        $this->set_thumbnail_width(100);
+        $this->set_thumbnail_width(300);
         $this->set_basedir('/public/uploads');
 
         /**

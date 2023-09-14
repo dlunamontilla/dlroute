@@ -8,45 +8,26 @@ use DLRoute\Test\TestController;
 include dirname(__DIR__) . "/vendor/autoload.php";
 
 /**
- * @test Lo que sigue es una prueba de uso del sistema de
- * enrutamiento.
+ * Este archivo se incorpora como ejemplo de uso del sistema de rutas. Sea el controlador
+ * o las funciones que se pasen como argumento deben devolver datos.
+ * 
+ * Los datos devueltos por la función serán analizados de forma automática para determinar
+ * su tipo y devolver al cliente una respuesta con su tipo MIME correspondiente a la 
+ * salida.
+ * 
+ * Lo que sigue más abajo son rutas de ejemplos recién creadas.
  */
 
-// DLRoute::get('/', function (object $params, array $data) {
-//     return [
-//         "data" => $data,
-//         "params" => $params
-//     ];
-// });
+DLRoute::post('/regex/{parametro}', [TestController::class, 'index'])->filter_by_type([
+    "parametro" => '/^[0-9]+$/'
+]);
 
+DLRoute::post('/test/{parametro}', function(object $params) {
+    return $params;
+})->filter_by_type([
+    "parametro" => "numeric"
+]);
 
-// DLRoute::post('/product/{id}', [TestController::class, 'index'])
-//     ->filter_by_type([
-//         "id" => ""
-//     ]);
-
-// DLRoute::get('/product/{id}/{name}', [TestController::class, 'index'])
-//     ->filter_by_type([
-//         "id" => "numeric",
-//         "name" => "email"
-//     ]);
-
-// DLRoute::patch('/test/{parametro}', function (object $params) {
-//     return $params;
-// })->filter_by_type([
-//     "parametro" => "integer"
-// ]);
-
-// DLRoute::put('/user/{id}/{email}', [TestController::class, 'index'])->filter_by_type([
-//     "id" => "integer",
-//     "email" => "email"
-// ]);
-
-DLRoute::get('/user/{parametro}', [TestController::class, 'index'])
-    ->filter_by_type([
-        "parametro" => 'numeric'
-    ]);
-
-DLRoute::post('/test/file', [TestController::class, 'index']);
+DLRoute::post('/test/{file}', [TestController::class, 'index']);
 
 DLRoute::execute();

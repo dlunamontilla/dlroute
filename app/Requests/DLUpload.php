@@ -783,7 +783,7 @@ trait DLUpload {
             $route_parts_thumbnail = explode("/", $thumbnail);
 
             /**
-             * Nombre del archivo thumbnail.
+             * Nombre del archivo `thumbnail`.
              * 
              * @var string
              */

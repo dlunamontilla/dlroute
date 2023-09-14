@@ -126,7 +126,7 @@ abstract class Route extends DLParamValueType{
     }
 
     /**
-     * Devuelve el controladora ejecutar en función de la ruta seleccionada por el usuario.
+     * Devuelve el controlador a ejecutar en función de la ruta seleccionada por el usuario.
      *
      * @param string $route
      * @return callable|array|string|null
@@ -145,9 +145,6 @@ abstract class Route extends DLParamValueType{
          * @var callable|array|string|null
          */
         $controller = null;
-
-
-        // self::process_params(self::$routes);
 
         if (!array_key_exists($method, self::$routes)) {
             return $controller;

@@ -59,7 +59,7 @@ abstract class DLParamValueType implements ParamTypeInterface {
      * @return void
      */
     protected function filter_param(array $filters, object $params): void {
-       
+
         foreach ($params as $key => $value) {
             if (!array_key_exists($key, $filters)) {
                 continue;
@@ -80,6 +80,7 @@ abstract class DLParamValueType implements ParamTypeInterface {
             $method = "is_{$pattern}";
 
             if (method_exists($this, $method)) {
+
                 /**
                  * Indicador de tipos.
                  * 

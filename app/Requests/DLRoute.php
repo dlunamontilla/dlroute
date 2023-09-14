@@ -1,5 +1,7 @@
 <?php
+
 namespace DLRoute\Requests;
+
 use DLRoute\Interfaces\RouteInterface;
 use DLRoute\Server\DLServer;
 
@@ -31,20 +33,23 @@ class DLRoute extends Route implements RouteInterface {
 
         self::request($uri, $controller, 'GET', $data, $mime_type);
 
-        return self::get_instance() ;
+        return self::get_instance();
     }
 
     public static function post(string $uri, callable|array|string $controller, array|object $data = [], ?string $mime_type = null): DLParamValueType {
+        self::$route = $uri;
+
         if (!DLServer::is_post()) {
             return self::get_instance();
         }
 
         self::request($uri, $controller, 'POST', $data, $mime_type);
 
-        return self::get_instance();        
+        return self::get_instance();
     }
 
     public static function put(string $uri, callable|array|string $controller, array|object $data = [], ?string $mime_type = null): DLParamValueType {
+        self::$route = $uri;
 
         if (!DLServer::is_put()) {
             return self::get_instance();
@@ -56,6 +61,7 @@ class DLRoute extends Route implements RouteInterface {
     }
 
     public static function patch(string $uri, callable|array|string $controller, array|object $data = [], ?string $mime_type = null): DLParamValueType {
+        self::$route = $uri;
 
         if (!DLServer::is_patch()) {
             return self::get_instance();
@@ -67,6 +73,7 @@ class DLRoute extends Route implements RouteInterface {
     }
 
     public static function delete(string $uri, callable|array|string $controller, array|object $data = [], ?string $mime_type = null): DLParamValueType {
+        self::$route = $uri;
 
         if (!DLServer::is_delete()) {
             return self::get_instance();
@@ -89,6 +96,10 @@ class DLRoute extends Route implements RouteInterface {
          * @var self
          */
         $instance = self::$instance;
+
+        if (is_null($instance)) {
+            self::run();
+        }
 
         /**
          * Filtros creados por el usuario desarrollador.
@@ -118,17 +129,19 @@ class DLRoute extends Route implements RouteInterface {
          */
         $registered_current_route = self::$current_param[$route] ?? null;
 
-        /**
-         * Permite indicar si hay un filtro o no.
-         * 
-         * @var boolean
-         */
-        $without_filters = is_null(self::$params) ||
-            is_null($registered_current_route) ||
-            !array_key_exists($method, $filters) ||
-            !array_key_exists($registered_current_route, $filters[$method]);
+        if (is_null(self::$params)) {
+            self::run();
+        }
 
-        if ($without_filters) {
+        if (is_null($registered_current_route)) {
+            self::run();
+        }
+
+        if (!array_key_exists($method, $filters)) {
+            self::run();
+        }
+
+        if (!array_key_exists($registered_current_route, $filters[$method])) {
             self::run();
         }
 
@@ -138,9 +151,9 @@ class DLRoute extends Route implements RouteInterface {
          * @var array
          */
         $current_filters = $filters[$method][$registered_current_route];
-        
+
         $instance->filter_param($current_filters, self::$params);
-        
+
         self::run();
     }
 
