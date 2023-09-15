@@ -526,6 +526,19 @@ trait DLUpload {
          */
         $finfo = new finfo();
 
+        $filename = trim($filename);
+
+        if (is_null($filename) || empty($filename)) {
+            header("Content-Type: application/json; charset=utf-8", true, 500);
+
+            echo DLOutput::get_json([
+                "status" => false,
+                "error" => "Posiblemente, deba configurar el servidor para aceptar archivos más grandes"
+            ], true);
+
+            exit;
+        }
+
         return $finfo->file($filename);
     }
 
