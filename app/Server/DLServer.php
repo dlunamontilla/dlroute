@@ -4,6 +4,7 @@ namespace DLRoute\Server;
 
 use DLRoute\Config\DLRealPath;
 use DLRoute\Interfaces\ServerInterface;
+use DLRoute\Routes\RouteDebugger;
 
 class DLServer implements ServerInterface {
 
@@ -156,6 +157,50 @@ class DLServer implements ServerInterface {
     public static function get_script_name(): string {
         $script_name = $_SERVER['SCRIPT_NAME'] ?? '';
         return urldecode($script_name);
+    }
+
+    /**
+     * Devuelve el nombre del archivo principal de ejecución de la aplicación.
+     *
+     * @return string
+     */
+    public static function get_script_file(): string {
+        /**
+         * Archivo principal de ejecución del proyecto.
+         * 
+         * @var string
+         */
+        $script_file = "";
+
+        if (array_key_exists('SCRIPT_NAME', $_SERVER)) {
+            $script_file = $_SERVER['SCRIPT_NAME'];
+        }
+
+        return $script_file;
+    }
+
+    /**
+     * Devuelve el directorio principal de ejecución
+     *
+     * @return string
+     */
+    public static function get_script_dir(): string {
+        /**
+         * Archivo principal de ejecución de la aplicación.
+         * 
+         * @var string
+         */
+        $file = self::get_script_file();
+
+        /**
+         * Directorio principal de ejecución.
+         * 
+         * @var string
+         */
+        $script_dir = dirname($file);
+        $script_dir = RouteDebugger::trim_slash($script_dir);
+
+        return $script_dir;
     }
 
     /**
