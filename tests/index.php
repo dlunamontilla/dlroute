@@ -30,4 +30,6 @@ DLRoute::post('/test/{parametro}', function(object $params) {
 
 DLRoute::post('/test/{file}', [TestController::class, 'index']);
 
+DLRoute::get('/server', [TestController::class, 'server']);
+
 DLRoute::execute();

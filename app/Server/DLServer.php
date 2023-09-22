@@ -160,26 +160,6 @@ class DLServer implements ServerInterface {
     }
 
     /**
-     * Devuelve el nombre del archivo principal de ejecución de la aplicación.
-     *
-     * @return string
-     */
-    public static function get_script_file(): string {
-        /**
-         * Archivo principal de ejecución del proyecto.
-         * 
-         * @var string
-         */
-        $script_file = "";
-
-        if (array_key_exists('SCRIPT_NAME', $_SERVER)) {
-            $script_file = $_SERVER['SCRIPT_NAME'];
-        }
-
-        return $script_file;
-    }
-
-    /**
      * Devuelve el directorio principal de ejecución
      *
      * @return string
@@ -190,7 +170,7 @@ class DLServer implements ServerInterface {
          * 
          * @var string
          */
-        $file = self::get_script_file();
+        $file = self::get_script_name();
 
         /**
          * Directorio principal de ejecución.
@@ -201,6 +181,53 @@ class DLServer implements ServerInterface {
         $script_dir = RouteDebugger::trim_slash($script_dir);
 
         return $script_dir;
+    }
+
+    /**
+     * Devuelve la URL base de la aplicación.
+     *
+     * @return string
+     */
+    public static function get_base_url(): string {
+        /**
+         * Ruta del host de ejecución de la aplicación.
+         * 
+         * @var string
+         */
+        $host = self::get_http_host();
+
+        /**
+         * Directorio base de ejecución de la aplicación.
+         * 
+         * @var string
+         */
+        $basedir = self::get_script_dir();
+
+        return "{$host}/{$basedir}";
+    }
+
+    /**
+     * Devuelve el subdirectorio en función de la URL base de la aplicación
+     *
+     * @param string $subdir Subdirectorio
+     * @return string
+     */
+    public static function get_subdir(string $subdir): string {
+        /**
+         * URL base de la aplicación
+         * 
+         * @var string
+         */
+        $base_url = self::get_base_url();
+        
+        $base_url = rtrim($base_url, "\/");
+        $base_url = trim($base_url);
+
+        $subdir = RouteDebugger::dot_to_slash($subdir);
+        $subdir = RouteDebugger::trim_slash($subdir);
+        $subdir = "{$base_url}/{$subdir}";
+
+        return $subdir;
     }
 
     /**

@@ -258,6 +258,12 @@ abstract class DLParamValueType implements ParamTypeInterface {
         return true;
     }
 
+    /**
+     * Verifica si la entrada es un número.
+     *
+     * @param mixed $input Entrada a ser procesada.
+     * @return boolean
+     */
     private function is_numeric(mixed $input): bool {
         if (!is_numeric($input)) {
             return false;
@@ -317,6 +323,13 @@ abstract class DLParamValueType implements ParamTypeInterface {
         exit;
     }
 
+    /**
+     * Permite establecer un mensaje personalizado.
+     *
+     * @param string $message Mensaje personalizado
+     * @param integer $code Código HTTP
+     * @return void
+     */
     private function message(string $message, int $code = 200): void {
         header("Content-Type: application/json; charset=utf-8", true, $code);
 

@@ -2,6 +2,7 @@
 
 namespace DLRoute\Test;
 use DLRoute\Config\Controller;
+use DLRoute\Server\DLServer;
 
 /**
  * Es un controlador de prueba para verificar que el sistema
@@ -54,6 +55,25 @@ final class TestController extends Controller {
             "params" => $params,
             "request" => $this->request->get_values(),
             "filenames" => $filenames
+        ];
+    }
+
+    /**
+     * Muestra información del servidor.
+     *
+     * @return string
+     */
+    public function server(): array {
+        /**
+         * Directorio base de la aplicación.
+         * 
+         * @var string
+         */
+        $basedir = DLServer::get_base_url();
+
+        return [
+            "basedir" => $basedir,
+            "base_url" => DLServer::get_subdir("uploads.ciencia")
         ];
     }
 }
