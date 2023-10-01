@@ -65,8 +65,6 @@ class DLServer implements ServerInterface {
             $user_agent = $_SERVER['HTTP_USER_AGENT'];
         }
 
-        print_r($_SERVER);
-
         return $user_agent;
     }
 
