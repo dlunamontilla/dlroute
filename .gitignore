@@ -6,7 +6,13 @@ vendor
 *.sql
 
 # Variables de entorno.
-.env
+.env*
+.type*
+
+# Los que se permitirán
+!.env.example
+!.env.type.example
+!.type.example
 
 # Ignorar el directorio de subida de archivos:
 uploads

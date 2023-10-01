@@ -9,11 +9,6 @@ use DLRoute\Routes\RouteDebugger;
 class DLServer implements ServerInterface {
 
     public static function get_uri(): string {
-        /**
-         * URI de la aplicación
-         * 
-         * @var string $uri
-         */
         $uri = "";
 
         if (array_key_exists('REQUEST_URI', $_SERVER)) {
@@ -24,11 +19,6 @@ class DLServer implements ServerInterface {
     }
 
     public static function get_hostname(): string {
-        /**
-         * Host en el que corre la aplicación
-         * 
-         * @var string $hostname
-         */
         $hostname = "";
 
         if (array_key_exists('SERVER_NAME', $_SERVER)) {
@@ -39,11 +29,6 @@ class DLServer implements ServerInterface {
     }
 
     public static function get_method(): string {
-        /**
-         * Método de HTTP de envío.
-         * 
-         * @var string $method
-         */
         $method = "";
 
         if (array_key_exists('REQUEST_METHOD', $_SERVER)) {
@@ -54,11 +39,6 @@ class DLServer implements ServerInterface {
     }
 
     public static function get_script_filename(): string {
-        /**
-         * Nombre del script de ejecución
-         * 
-         * @var string $script_filename
-         */
         $script_filename = "";
 
         if (array_key_exists('SCRIPT_FILENAME', $_SERVER)) {
@@ -69,11 +49,6 @@ class DLServer implements ServerInterface {
     }
 
     public static function get_ipaddress(): string {
-        /**
-         * Dirección IP del cliente
-         * 
-         * @var string $ip
-         */
         $ip = "";
 
         if (array_key_exists('REMOTE_ADDR', $_SERVER)) {
@@ -84,26 +59,18 @@ class DLServer implements ServerInterface {
     }
 
     public static function get_user_agent(): string {
-        /**
-         * Agente de usuario del cliente
-         * 
-         * @var string $user_agent
-         */
         $user_agent = "";
 
         if (array_key_exists('HTTP_USER_AGENT', $_SERVER)) {
             $user_agent = $_SERVER['HTTP_USER_AGENT'];
         }
 
+        print_r($_SERVER);
+
         return $user_agent;
     }
 
     public static function get_document_root(): string {
-        /**
-         * Ruta real de la aplicación
-         * 
-         * @var DLRealPath $realpath
-         */
         $realpath = DLRealPath::get_instance();
         return trim($realpath->get_document_root());
     }
@@ -129,18 +96,7 @@ class DLServer implements ServerInterface {
     }
 
     public static function get_http_host(): string {
-        /**
-         * Nombre de host en el que corre la aplicación
-         * 
-         * @var string $http_host;
-         */
         $http_host = "";
-
-        /**
-         * Devuelve el protocolo HTTP o HTTPs
-         * 
-         * @var string $protocol
-         */
         $protocol = self::get_protocol();
 
         if (array_key_exists('HTTP_HOST', $_SERVER)) {
@@ -148,6 +104,47 @@ class DLServer implements ServerInterface {
         }
 
         return "{$protocol}{$http_host}";
+    }
+
+    /**
+     * Devuelve el puerto de escucha HTTP donde corre la aplicación.
+     *
+     * @return integer|null
+     */
+    public static function get_port(): ?int {
+        /**
+         * Puerto del servidor
+         * 
+         * @var integer
+         */
+        $port = null;
+
+        if (array_key_exists('SERVER_PORT', $_SERVER)) {
+            $port = (int) $_SERVER['SERVER_PORT'];
+        }
+
+        return $port;
+    }
+
+    /**
+     * Devuelve el software del servidor
+     *
+     * @return string|null
+     */
+    public static function get_server_software(): ?string {
+        
+        /**
+         * Software del servidor
+         * 
+         * @var string|null
+         */
+        $server_software = null;
+
+        if (array_key_exists('SERVER_SOFTWARE', $_SERVER)) {
+            $server_software = $_SERVER['SERVER_SOFTWARE'];
+        }
+
+        return $server_software;
     }
 
     public static function get_route(): string {
@@ -199,11 +196,6 @@ class DLServer implements ServerInterface {
     }
 
     public static function get_script_name(): string {
-        /**
-         * Nombre del script de ejecución de la aplicación
-         * 
-         * @var string $script_name
-         */
         $script_name = $_SERVER['SCRIPT_NAME'] ?? '';
         return urldecode($script_name);
     }
@@ -272,11 +264,6 @@ class DLServer implements ServerInterface {
         $base_url = rtrim($base_url, "\/");
         $base_url = trim($base_url);
 
-        /**
-         * Subdirectorio de la aplicación.
-         * 
-         * @var string $subdir
-         */
         $subdir = RouteDebugger::dot_to_slash($subdir);
         $subdir = RouteDebugger::trim_slash($subdir);
         $subdir = "{$base_url}/{$subdir}";
@@ -290,18 +277,8 @@ class DLServer implements ServerInterface {
      * @return string
      */
     private static function get_protocol(): string {
-        /**
-         * Es HTTPS
-         * 
-         * @var boolean $is_https
-         */
         $is_https = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
 
-        /**
-         * Protocolo
-         * 
-         * @var string $protocol
-         */
         $protocol = "http://";
 
         if ($is_https) {
@@ -326,6 +303,7 @@ class DLServer implements ServerInterface {
         $pattern = '\?(.*)$';
 
         $input = trim($input);
+
         $input = preg_replace("/{$pattern}/", '', $input);
     }
 }
