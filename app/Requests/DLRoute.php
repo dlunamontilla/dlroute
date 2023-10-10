@@ -19,11 +19,6 @@ use DLRoute\Server\DLServer;
 class DLRoute extends Route implements RouteInterface {
     private static ?self $instance = null;
 
-    private static ?DLParamValueType $param_value_type = null;
-    private function __construct() {
-        self::$param_value_type = $this->get_param_instance();
-    }
-
     public static function get(string $uri, callable|array|string $controller, array|object $data = [], ?string $mime_type = null): DLParamValueType {
         self::$route = $uri;
 
@@ -163,5 +158,9 @@ class DLRoute extends Route implements RouteInterface {
         }
 
         return self::$instance;
+    }
+
+    public static function get_routes(): array {
+        return self::$routes;
     }
 }

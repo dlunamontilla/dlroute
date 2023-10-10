@@ -32,4 +32,8 @@ DLRoute::post('/test/{file}', [TestController::class, 'index']);
 
 DLRoute::get('/server', [TestController::class, 'server']);
 
+DLRoute::post('/ciencia/{parametro1}/ciencia/{parametro2}', function(object $params) {
+    return DLRoute::get_routes();
+});
+
 DLRoute::execute();

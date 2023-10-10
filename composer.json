@@ -3,6 +3,7 @@
     "description": "Sistema de enrutamiento para usar en DLUnire o cualquier otro proyecto.",
     "type": "library",
     "license": "MIT",
+    "version": "v1.3.9",
     "autoload": {
         "psr-4": {
             "DLRoute\\": "app/"
