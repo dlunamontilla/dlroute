@@ -160,6 +160,11 @@ class DLRoute extends Route implements RouteInterface {
         return self::$instance;
     }
 
+    /**
+     * Devuelve las rutas registrada del método actual enviado por el cliente HTTP
+     *
+     * @return array
+     */
     public static function get_routes(): array {
         return self::$routes;
     }
