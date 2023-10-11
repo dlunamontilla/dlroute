@@ -259,7 +259,7 @@ class DLRequest implements RequestInterface {
             echo DLOutput::get_json([
                 "status" => false,
                 "error" => "El controlador no está definido"
-            ]);
+            ], true);
 
             exit;
         }
@@ -288,7 +288,7 @@ class DLRequest implements RequestInterface {
                 echo DLOutput::get_json([
                     "status" => false,
                     "error" => "El controlador no está definido"
-                ]);
+                ], true);
     
                 exit;
             }

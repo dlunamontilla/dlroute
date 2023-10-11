@@ -255,7 +255,7 @@ abstract class Route extends DLParamValueType{
             $error = DLOutput::get_json([
                 "status" => false,
                 "error" => "El controlador «{$controller_name}» no está definido."
-            ]);
+            ], true);
 
             if (self::is_production()) {
                 self::set_error($error);
@@ -274,7 +274,7 @@ abstract class Route extends DLParamValueType{
             $error = DLOutput::get_json([
                 "status" => false,
                 "error" => "El método «{$controller_method}» del controlador «{$controller_name}» no está definido"
-            ]);
+            ], true);
 
             if (self::is_production()) {
                 self::set_error($error);

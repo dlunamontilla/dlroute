@@ -28,7 +28,7 @@ DLRoute::post('/test/{parametro}', function(object $params) {
     "parametro" => "numeric"
 ]);
 
-DLRoute::post('/test/{file}', [TestController::class, 'index']);
+DLRoute::get('/test/{file}', [TestController::class, 'index']);
 
 DLRoute::get('/server', [TestController::class, 'server']);
 
