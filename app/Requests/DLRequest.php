@@ -158,9 +158,11 @@ class DLRequest implements RequestInterface {
         if (!is_null($request)) {
             foreach ($request as &$value) {
                 
-                if (is_string($value)) {
-                    $value = trim($value);
+                if (!is_string($value)) {
+                    continue;
                 }
+                
+                $value = trim($value);
 
                 if (is_numeric($value)) {
                     $is_float = preg_match("/\./", $value);
