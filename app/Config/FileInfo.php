@@ -172,7 +172,11 @@ class FileInfo implements FileInfoInterface {
          * 
          * @var array|bool
          */
-        $image_type = getimagesize($filename);
+        $image_type = [];
+
+        if (file_exists($filename) && !is_dir($filename)) {
+            $image_type = getimagesize($filename);
+        }
 
         /**
          * Tamaño en bytes.
