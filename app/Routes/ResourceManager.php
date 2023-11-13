@@ -142,8 +142,6 @@ class ResourceManager implements ResourceInterface {
          */
         $aux_path = $path;
 
-        $path = self::process_uri($path);
-
         if ($path === false) {
             return "<!-- El recurso {$aux_path} no existe -->";
         }
