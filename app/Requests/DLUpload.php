@@ -807,12 +807,7 @@ trait DLUpload {
                 continue;
             }
 
-            if (file_exists($file->target)) {
-                // unlink($file->target);
-            }
-
-            // $file->target = $image_file;
-
+            $file->target = $image_file;
             $file->thumbnail = $thumbnail;
 
             /**
