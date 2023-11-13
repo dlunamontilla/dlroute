@@ -14,8 +14,9 @@ vendor
 !.env.type.example
 !.type.example
 
-# Ignorar el directorio de subida de archivos:
+# Ignorar el directorio de almacenamiento:
 uploads
+storage
 
 # Directorio public
 public

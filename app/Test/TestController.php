@@ -76,4 +76,15 @@ final class TestController extends Controller {
             "base_url" => DLServer::get_subdir("uploads.ciencia")
         ];
     }
+
+    public function file(): array {
+
+        $this->set_basedir('/storage/uploads');
+
+        $filenames = $this->upload_file('file', 'image/*');
+        
+        return [
+            "files" => $filenames
+        ];
+    }
 }

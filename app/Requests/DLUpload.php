@@ -312,6 +312,7 @@ trait DLUpload {
                 $readable_size = $this->get_readable_size((int) $size);
 
                 $name = $this->slug($filename, $type, ['file' => $tmp_name, 'type' => $files['type'][$key] ?? '']);
+                $name = $this->replace_to_webp($name);
 
                 $filenames[] = [
                     "name" => $name,
@@ -338,7 +339,7 @@ trait DLUpload {
          * @var string
          */
         $name = $files['name'];
-
+        $name = $this->replace_to_webp($name);
         /**
          * Nombre temporal del archivo.
          * 
@@ -407,6 +408,19 @@ trait DLUpload {
         ];
 
         return $filenames;
+    }
+
+    /**
+     * Reemplaza cualquier extensión de archivo a `webp`
+     *
+     * @param string $input Entrada a ser analizada.
+     * @return string
+     */
+    private function replace_to_webp(string $input): string {
+        $input = trim($input, "\.");
+        $input = preg_replace('/([^.]+)$/', 'webp', $input);
+
+        return trim($input);
     }
 
     /**
@@ -778,6 +792,27 @@ trait DLUpload {
              */
             $thumbnail = $this->resize_image($file->target, $file->type);
 
+            if (is_null($thumbnail)) {
+                continue;
+            }
+
+            /**
+             * Imagen en formato WebP
+             * 
+             * @var string | null $image_file
+             */
+            $image_file = $this->format_image($file->target, $file->type);
+
+            if (is_null($image_file)) {
+                continue;
+            }
+
+            if (file_exists($file->target)) {
+                // unlink($file->target);
+            }
+
+            // $file->target = $image_file;
+
             $file->thumbnail = $thumbnail;
 
             /**
@@ -978,6 +1013,174 @@ trait DLUpload {
     }
 
     /**
+     * Cambia el formato de la imagen a formato WebP de forma automática.
+     *
+     * @param string $filename Archivo a ser analizado y procesado.
+     * @param string $mime_type Indica el tipo a ser analizado.
+     * @return string|null
+     */
+    private function format_image(string $filename, string $mime_type): string|null {
+
+        if (!file_exists($filename)) {
+            return null;
+        }
+
+        $mime_type = trim($mime_type);
+
+        /**
+         * Patrón de búsqueda de formatos de imágenes.
+         * 
+         * @var  string
+         */
+        $pattern = "/^image\/(.*?)$/i";
+
+        /**
+         * Valida si el archivo es una imagen.
+         * 
+         * @var boolean
+         */
+        $is_image = preg_match($pattern, $mime_type);
+
+        if (!$is_image) {
+            return null;
+        }
+
+        /**
+         * Información de la imagen.
+         * 
+         * @var array|false
+         */
+        $info = getimagesize($filename);
+
+        if ($info === FALSE) {
+            return null;
+        }
+
+        /**
+         * Comprueba si las proporciones están disponibles.
+         * 
+         * @var boolean
+         */
+        $is_available = array_key_exists(0, $info) && array_key_exists(1, $info);
+
+        if (!$is_available) {
+            return null;
+        }
+
+        if (!class_exists('GdImage')) {
+            return null;
+        }
+
+        /**
+         * Anchura original de la imagen.
+         * 
+         * @var integer
+         */
+        $width = (int) $info[0];
+
+        /**
+         * Altura original de la imagen.
+         * 
+         * @var integer
+         */
+        $height = (int) $info[1];
+
+        /**
+         * Directorio base donde se almacenarán las miniaturas.
+         * 
+         * @var string
+         */
+        $dir = dirname($filename);
+
+        if (file_exists($dir) && !is_dir($dir)) {
+            unlink($dir);
+        }
+
+        if (!file_exists($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        /**
+         * Imagen creada a partir de un fichero o ruta.
+         * 
+         * @var GdImage|resource|false
+         */
+        $image = false;
+
+        if ($this->is_jpeg($mime_type)) {
+            $image = imagecreatefromjpeg($filename);
+        }
+
+        if ($this->is_png($mime_type)) {
+            $image = imagecreatefrompng($filename);
+        }
+
+        if ($this->is_gif($mime_type)) {
+            $image = imagecreatefromgif($filename);
+        }
+
+        if ($this->is_bitmap($mime_type)) {
+            $image = @imagecreatefrombmp($filename);
+        }
+
+        if ($this->is_webp($mime_type)) {
+            $image = imagecreatefromwebp($filename);
+        }
+
+        /**
+         * Indica si `$image` es un recurso o no.
+         * 
+         * @var boolean
+         */
+        $is_resource = is_resource($image) || ($image instanceof GdImage);
+
+        if (!$is_resource) {
+            return null;
+        }
+
+        /**
+         * Nueva imagen creada a partir de la original con otras dimensiones.
+         * 
+         * @var GdImage|resource|false
+         */
+        $new_image = imagecreatetruecolor($width, $height);
+
+        imagealphablending($new_image, false);
+        imagesavealpha($new_image, true);
+        $transparent = imagecolorallocatealpha($new_image, 255, 255, 255, 127);
+        imagefilledrectangle($new_image, 0, 0, $width, $height, $transparent);
+        
+        $is_resource = is_resource($new_image) || ($new_image instanceof GdImage);
+
+        if (!$is_resource) {
+            return null;
+        }
+
+        imagecopyresampled($new_image, $image, 0, 0, 0, 0, $width, $height, imagesx($image), imagesy($image));
+
+        /**
+         * Ruta completa del thumbnail.
+         * 
+         * @var string
+         */
+        $file = preg_replace('/\.(.*?)$/i', '', $filename);
+        $file .= ".webp";
+
+        /**
+         * Indica si se ha creado la imagen en la ruta indicada.
+         * 
+         * @var boolean
+         */
+        $it_created = @imagewebp($new_image, $file);
+
+        if ($it_created) {
+            imagedestroy($image);
+            imagedestroy($new_image);
+        }
+
+        return $it_created ? $file : null;
+    }
+    /**
      * Cambia el tamaño de las imágenes y devuelve la ruta de la vista previa, 
      * caso contrario, devuelve `NULL`.
      *
@@ -1125,6 +1328,11 @@ trait DLUpload {
          * @var GdImage|resource|false
          */
         $new_image = imagecreatetruecolor($thumbnail_width, $thumbnail_height);
+
+        imagealphablending($new_image, false);
+        imagesavealpha($new_image, true);
+        $transparent = imagecolorallocatealpha($new_image, 255, 255, 255, 127);
+        imagefilledrectangle($new_image, 0, 0, $thumbnail_width, $thumbnail_height, $transparent);
 
         $is_resource = is_resource($new_image) || ($new_image instanceof GdImage);
 

@@ -36,4 +36,6 @@ DLRoute::post('/ciencia/{parametro1}/ciencia/{parametro2}', function(object $par
     return DLRoute::get_routes();
 });
 
+DLRoute::post('/file', [TestController::class, 'file']);
+
 DLRoute::execute();
