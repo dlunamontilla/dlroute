@@ -81,7 +81,7 @@ final class TestController extends Controller {
 
         $this->set_basedir('/storage/uploads');
 
-        $filenames = $this->upload_file('file', 'image/*');
+        $filenames = $this->upload_file('file', '*/*');
         
         return [
             "files" => $filenames

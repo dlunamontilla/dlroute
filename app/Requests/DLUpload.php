@@ -2,6 +2,7 @@
 
 namespace DLRoute\Requests;
 
+use DLRoute\Config\FileInfo;
 use DLRoute\Routes\RouteDebugger;
 use DLRoute\Server\DLServer;
 use Error;
@@ -312,7 +313,16 @@ trait DLUpload {
                 $readable_size = $this->get_readable_size((int) $size);
 
                 $name = $this->slug($filename, $type, ['file' => $tmp_name, 'type' => $files['type'][$key] ?? '']);
-                $name = $this->replace_to_webp($name);
+                
+                if (
+                    $this->is_png($type) ||
+                    $this->is_jpeg($type) ||
+                    $this->is_bitmap($type) ||
+                    $this->is_gif($type) ||
+                    $this->is_webp($type)
+                ) {
+                    $name = $this->replace_to_webp($name);
+                }
 
                 $filenames[] = [
                     "name" => $name,
@@ -391,6 +401,16 @@ trait DLUpload {
         $error = (int) $files['error'];
 
         $name = $this->slug($name, $type, ['file' => $tmp_name, 'type' => $files['type'] ?? '']);
+
+        if (
+            $this->is_png($type) ||
+            $this->is_jpeg($type) ||
+            $this->is_bitmap($type) ||
+            $this->is_gif($type) ||
+            $this->is_webp($type)
+        ) {
+            $name = $this->replace_to_webp($name);
+        }
 
         $filenames[] = [
             "name" => $name,
@@ -1300,10 +1320,6 @@ trait DLUpload {
 
         if ($this->is_bitmap($mime_type)) {
             $image = @imagecreatefrombmp($filename);
-        }
-
-        if ($this->is_webp($mime_type)) {
-            $image = imagecreatefromwebp($filename);
         }
 
         /**
