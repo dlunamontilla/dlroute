@@ -1173,7 +1173,7 @@ trait DLUpload {
             imagedestroy($new_image);
         }
 
-        return $it_created ? $file : null;
+        return $it_created ? $file : $filename;
     }
     /**
      * Cambia el tamaño de las imágenes y devuelve la ruta de la vista previa, 
