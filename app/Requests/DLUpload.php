@@ -349,7 +349,7 @@ trait DLUpload {
          * @var string
          */
         $name = $files['name'];
-        $name = $this->replace_to_webp($name);
+        
         /**
          * Nombre temporal del archivo.
          * 
