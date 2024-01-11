@@ -163,25 +163,6 @@ class DLRequest implements RequestInterface {
                 }
                 
                 $value = trim($value);
-
-                if (is_numeric($value)) {
-                    $is_float = preg_match("/\./", $value);
-
-                    if ($is_float) {
-                        $value = (float) $value;
-                        continue;
-                    }
-
-                    $value = (int) $value;
-                }
-
-                if (strtolower($value) === "true") {
-                    $value = true;
-                }
-
-                if (strtolower($value) === "false") {
-                    $value = false;
-                }
             }
         }
 
