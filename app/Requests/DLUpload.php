@@ -2,11 +2,8 @@
 
 namespace DLRoute\Requests;
 
-use DLRoute\Config\FileInfo;
 use DLRoute\Routes\RouteDebugger;
 use DLRoute\Server\DLServer;
-use Error;
-use Exception;
 use finfo;
 use GdImage;
 
@@ -889,7 +886,7 @@ trait DLUpload {
          * 
          * @var string
          */
-        $attributes_pattern = '/\b(eval\((.*)(\)|\"|\')?|href=[\S]*(\"|\'))/i';
+        $attributes_pattern = '/(?<!xlink:)(eval\((.*)(\)|\"|\')?|href=[\S]*(\"|\'))/i';
 
         /**
          * Patrón de búsqueda de atributos `data-*` incompletos.
@@ -920,13 +917,6 @@ trait DLUpload {
         $php_block_pattern = '/<\?(php)?[\s\S]*?\?>/i';
 
         /**
-         * Patrón de búsqueda de fragmentos PHP sobrantes.
-         * 
-         * @var string
-         */
-        $php_pattern = '/<\?(php)?|\?>/i';
-
-        /**
          * Contenido a ser depurado.
          * 
          * @var string
@@ -938,7 +928,29 @@ trait DLUpload {
          * 
          * @var string
          */
-        $xml_pattern = '/<\?xml version="1.0" encoding="UTF-8" standalone="no"\?>/i';
+        $xml_pattern = '/<\?xml version=("|\')[0-9]+\.*[0-9]*("|\') encoding=("|\')(.*?)("|\') standalone="(.*?)"\?>/i';
+
+        /**
+         * Patrón de búsqueda de fragmentos PHP sobrantes.
+         * 
+         * @var string
+         */
+        $php_pattern = '/(<\?(.*)?|\?>)|(<\%)|(%>)|(\{+)|(\}+)/i';
+
+        /**
+         * Si por alguna razón se cuela algúna instrucción de un archivo ASP
+         * o similar.
+         * 
+         * @var string $pattern
+         */
+        $pattern = "/<\%(.*)?/i";
+
+        /**
+         * Remover atributos src y srcset
+         * 
+         * @var string $attributes
+         */
+        $attributes = '/(src|srcset)\=(\"|\')[\s\S]*?(\"|\')/i';
 
         /**
          * Indicador de existencia de cabeceras XML en el archivo SVG.
@@ -956,6 +968,8 @@ trait DLUpload {
         $content = preg_replace($js_events_pattern, '', $content);
         $content = preg_replace($attributes_pattern, '', $content);
         $content = preg_replace($data_attributes_pattern, '', $content);
+        $content = preg_replace($attributes, '', $content);
+        $content = preg_replace($pattern, '', $content);
 
         $content = trim($content);
 
@@ -1320,6 +1334,10 @@ trait DLUpload {
 
         if ($this->is_bitmap($mime_type)) {
             $image = @imagecreatefrombmp($filename);
+        }
+
+        if ($this->is_webp($mime_type)) {
+            $image = imagecreatefromwebp($filename);
         }
 
         /**
