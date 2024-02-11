@@ -310,7 +310,7 @@ trait DLUpload {
                 $readable_size = $this->get_readable_size((int) $size);
 
                 $name = $this->slug($filename, $type, ['file' => $tmp_name, 'type' => $files['type'][$key] ?? '']);
-                
+
                 if (
                     $this->is_png($type) ||
                     $this->is_jpeg($type) ||
@@ -346,7 +346,7 @@ trait DLUpload {
          * @var string
          */
         $name = $files['name'];
-        
+
         /**
          * Nombre temporal del archivo.
          * 
@@ -696,7 +696,7 @@ trait DLUpload {
             $filename .= ".{$extension}";
         }
 
-        if ($mime_type === 'image/x-ms-bmp') {
+        if ($mime_type === 'image/x-ms-bmp' || $mime_type === "image/bmp") {
             $mime_type = $type;
         }
 
@@ -1038,7 +1038,27 @@ trait DLUpload {
      * @return boolean
      */
     private function is_webp(string $mime_type): bool {
-        return $mime_type === 'image/webp';
+
+        $mime_type = trim($mime_type);
+        $mime_type = strtolower($mime_type);
+        
+        /**
+         * Tipos mimes disponibles en WebP
+         * 
+         * @var string[] $mime_types
+         */
+        $mime_types = [
+            'image/webp',
+            'image/x-webp',
+            'image/vnd.google.webp',
+            'image/webp-image',
+            'image/x-webp-image',
+            'image/x-google-webp',
+            'image/google-webp',
+            'image/vnd.webp'
+        ];
+
+        return in_array($mime_type, $mime_types);
     }
 
     /**
@@ -1178,7 +1198,7 @@ trait DLUpload {
         imagesavealpha($new_image, true);
         $transparent = imagecolorallocatealpha($new_image, 255, 255, 255, 127);
         imagefilledrectangle($new_image, 0, 0, $width, $height, $transparent);
-        
+
         $is_resource = is_resource($new_image) || ($new_image instanceof GdImage);
 
         if (!$is_resource) {
@@ -1224,6 +1244,7 @@ trait DLUpload {
         }
 
         $mime_type = trim($mime_type);
+        $mime_type = strtolower($mime_type);
 
         /**
          * Patrón de búsqueda de formatos de imágenes.
@@ -1266,7 +1287,12 @@ trait DLUpload {
         }
 
         if (!class_exists('GdImage')) {
-            return null;
+            http_response_code(500);
+            echo DLOutput::get_json([
+                "status" => false,
+                "error" => "Instale la extensión GdImage"
+            ]);
+            exit;
         }
 
         /**
