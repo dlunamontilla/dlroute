@@ -716,20 +716,13 @@ trait DLUpload {
      * @return string
      */
     private function get_basedir(): string {
-        /**
-         * Directorio raíz de la aplicación.
-         * 
-         * @var string
-         */
-        $root = DLServer::get_document_root();
 
         /**
          * Directorio base para subir archivos.
          * 
          * @var string
          */
-        $basedir = "{$root}/{$this->basedir}";
-        $basedir = RouteDebugger::clear_route($basedir);
+        $basedir = RouteDebugger::clear_route($this->basedir);
 
         /**
          * Año actual del servidor.
@@ -747,25 +740,31 @@ trait DLUpload {
 
         $basedir = "/{$basedir}/{$year}/{$month}";
         $basedir = trim($basedir);
-        $basedir = preg_replace("/^\/([a-z])/i","$1", $basedir);
 
-        if (!file_exists($basedir)) {
-            mkdir($basedir, 0755, true);
+        /**
+         * Ruta absoluta del archivo
+         * 
+         * @var string $absolute_path
+         */
+        $absolute_path = $this->get_absolute_path($basedir);
+
+        if (!file_exists($absolute_path)) {
+            mkdir($absolute_path, 0755, true);
         }
 
-        if (!is_dir($basedir)) {
+        if (!is_dir($absolute_path)) {
             $this->error('La ruta especificada no es un directorio. Considere otro nombre');
         }
 
-        if (!is_readable($basedir)) {
+        if (!is_readable($absolute_path)) {
             $this->error("No tienes permiso de lectura. Contacte con el administrador para cambiar los permisos de lectura");
         }
 
-        if (!is_writable($basedir)) {
+        if (!is_writable($absolute_path)) {
             $this->error("No tienes permiso de escritura. Contacte con el administrador del servidor");
         }
 
-        return $basedir;
+        return $absolute_path;
     }
 
     /**
@@ -1043,7 +1042,7 @@ trait DLUpload {
 
         $mime_type = trim($mime_type);
         $mime_type = strtolower($mime_type);
-        
+
         /**
          * Tipos mimes disponibles en WebP
          * 
@@ -1478,5 +1477,55 @@ trait DLUpload {
         $relative_basedir = preg_replace('/\//', DIRECTORY_SEPARATOR, $relative_basedir);
 
         return RouteDebugger::trim_slash($relative_basedir);
+    }
+
+    /**
+     * Devuelve la ruta absoluta del archivo
+     *
+     * @return string
+     */
+    protected function get_absolute_path(string $relative_path): string {
+
+        /**
+         * Directorio raíz de la aplicación
+         * 
+         * @var string $root
+         */
+        $root = DLServer::get_document_root();
+
+        /**
+         * Ruta absoluta de la aplicación
+         * 
+         * @var string $path
+         */
+        $path = "{$root}/{$relative_path}";
+
+        /**
+         * Ruta física del archivo
+         * 
+         * @var string $absolute_path
+         */
+        $absolute_path = $this->get_path($path);
+        
+        return $absolute_path;
+    }
+
+    /**
+     * Devuelve la ruta formateada en función del sistema operativo.
+     *
+     * @param string $path Ruta absoluta o relativa al archivo
+     * @return string
+     */
+    protected function get_path(string $path): string {
+
+        /**
+         * Ruta física del archivo
+         * 
+         * @var string $new_path
+         */
+        $new_path = preg_replace('/[a-z]:/i', '', $path);
+        $new_path = preg_replace('/[\/\\\]+/', DIRECTORY_SEPARATOR, $path);
+        
+        return trim($new_path);
     }
 }

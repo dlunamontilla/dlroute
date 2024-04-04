@@ -19,6 +19,8 @@ class RouteDebugger implements DebuggerInterface {
     public static function clear_route(string $route): string {
         $route = self::delete_duplicate_slash($route);
         $route = self::trim_slash($route);
+        $route = preg_replace("/[a-z]:/i", '', $route);
+        
         return $route;
     }
 
