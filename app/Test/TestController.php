@@ -77,6 +77,11 @@ final class TestController extends Controller {
         ];
     }
 
+    /**
+     * Subida de archivos
+     *
+     * @return array
+     */
     public function file(): array {
 
         $this->set_basedir('/storage/uploads');

@@ -57,9 +57,9 @@ interface FileInfoInterface {
      * Devuelve el tamaño del archivo en un formato legible.
      *
      * @param string $filename Archivo a ser analizado.
-     * @return string
+     * @return int|string
      */
-    public static function get_format_size(string $filename): string;
+    public static function get_format_size(string $filename): int|string;
 
     /**
      * Devuelve información del archivo.

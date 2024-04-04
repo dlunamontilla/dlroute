@@ -18,24 +18,14 @@ include dirname(__DIR__) . "/vendor/autoload.php";
  * Lo que sigue más abajo son rutas de ejemplos recién creadas.
  */
 
-DLRoute::post('/regex/{parametro}', [TestController::class, 'index'])->filter_by_type([
-    "parametro" => '/^[0-9]+$/'
-]);
+DLRoute::get('/', function() {
 
-DLRoute::post('/test/{parametro}', function(object $params) {
-    return $params;
-})->filter_by_type([
-    "parametro" => "numeric"
-]);
-
-DLRoute::get('/test/{file}', [TestController::class, 'index']);
-
-DLRoute::get('/server', [TestController::class, 'server']);
-
-DLRoute::post('/ciencia/{parametro1}/ciencia/{parametro2}', function(object $params) {
-    return DLRoute::get_routes();
+    return [
+        'status' => true,
+        'success' => "Mensaje de prueba"
+    ];
 });
 
-DLRoute::post('/file', [TestController::class, 'file']);
+DLRoute::post('/test', [TestController::class,'file']);
 
 DLRoute::execute();

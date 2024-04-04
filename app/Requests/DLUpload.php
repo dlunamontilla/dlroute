@@ -60,7 +60,7 @@ trait DLUpload {
      *
      * @var integer
      */
-    private int $thumbnail_width = 300;
+    private int|float $thumbnail_width = 300;
 
     /**
      * Sube los archivos al servidor.
@@ -746,6 +746,8 @@ trait DLUpload {
         $month = date('m');
 
         $basedir = "/{$basedir}/{$year}/{$month}";
+        $basedir = trim($basedir);
+        $basedir = preg_replace("/^\/([a-z])/i","$1", $basedir);
 
         if (!file_exists($basedir)) {
             mkdir($basedir, 0755, true);
@@ -1300,21 +1302,21 @@ trait DLUpload {
          * 
          * @var integer
          */
-        $width = (int) $info[0];
+        $width = intval($info[0]);
 
         /**
          * Altura original de la imagen.
          * 
          * @var integer
          */
-        $height = (int) $info[1];
+        $height = intval($info[1]);
 
         /**
          * Nueva anchura establecida para miniaturas.
          * 
          * @var integer
          */
-        $thumbnail_width = $this->thumbnail_width;
+        $thumbnail_width = intval($this->thumbnail_width);
 
         /**
          * Se establece la altura automáticamente en función de la anchura
@@ -1322,7 +1324,7 @@ trait DLUpload {
          * 
          * @var float
          */
-        $thumbnail_height = (float) $thumbnail_width / $width * $height;
+        $thumbnail_height = intval($thumbnail_width / $width * $height);
 
         /**
          * Directorio base donde se almacenarán las miniaturas.
@@ -1382,7 +1384,7 @@ trait DLUpload {
          * 
          * @var GdImage|resource|false
          */
-        $new_image = imagecreatetruecolor($thumbnail_width, $thumbnail_height);
+        $new_image = @imagecreatetruecolor($thumbnail_width, $thumbnail_height);
 
         imagealphablending($new_image, false);
         imagesavealpha($new_image, true);
@@ -1473,6 +1475,7 @@ trait DLUpload {
          * @var string
          */
         $relative_basedir = join("/", $route_parts) . "/{$dir_by_date}";
+        $relative_basedir = preg_replace('/\//', DIRECTORY_SEPARATOR, $relative_basedir);
 
         return RouteDebugger::trim_slash($relative_basedir);
     }

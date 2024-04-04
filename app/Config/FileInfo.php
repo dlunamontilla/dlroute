@@ -35,6 +35,11 @@ class FileInfo implements FileInfoInterface {
      * @return boolean
      */
     public static function is_image(string $filename): bool {
+        /**
+         * Patrón de búsqueda de imagen
+         * 
+         * @var string $pattern
+         */
         $pattern = "/^image\/(.*?)$/i";
 
         
@@ -53,6 +58,7 @@ class FileInfo implements FileInfoInterface {
     }
 
     public static function get_type(string $filename): string {
+
         $info = self::get_info($filename);
         return trim($info->mime ?? '');
     }
@@ -99,6 +105,12 @@ class FileInfo implements FileInfoInterface {
         return $bits;
     }
 
+    /**
+     * Devuelve las dimensiones de la imagen
+     *
+     * @param string $filename
+     * @return object
+     */
     public static function get_dimensions(string $filename): object {
         /**
          * Devuelve las dimensiones del archivo.
@@ -155,7 +167,7 @@ class FileInfo implements FileInfoInterface {
 
         return $size;
     }
-    public static function get_format_size(string $filename): string {
+    public static function get_format_size(string $filename): int|string {
         /**
          * Tamaño en bytes del archivo.
          * 
@@ -163,7 +175,7 @@ class FileInfo implements FileInfoInterface {
          */
         $size = self::get_size($filename);
 
-        return self::get_format_size($size);
+        return $size;
     }
 
     public static function get_info(string $filename): object {
