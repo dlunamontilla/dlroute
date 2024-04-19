@@ -404,6 +404,7 @@ final class Filename {
          */
         $output = trim($new_filename);
         $output = preg_replace($pattern, '', $output);
+        $output_relative = preg_replace($pattern, '', $filename);
         $output = "{$output}.webp";
 
         if (!file_exists($output)) {
@@ -428,6 +429,7 @@ final class Filename {
 
         if (!is_null($preview_width)) {
             $output = str_replace($basedir, $thumbnail, $output);
+            $output_relative = str_replace($basedir, $thumbnail, $output_relative);
         }
 
         $image->save($output, [
@@ -435,7 +437,8 @@ final class Filename {
             'quality' => 100,
         ]);
 
-        return $output;
+
+        return $output_relative;
     }
 
     /**
