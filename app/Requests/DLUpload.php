@@ -174,13 +174,13 @@ trait DLUpload {
          * 
          * @var array
          */
-        $filtered_filenames = array_filter($filenames, function (array $filename) use ($pattern) {
+        $filtered_filenames = array_filter($filenames, function (Filename $filename) use ($pattern) {
             /**
              * Tipo de archivo.
              * 
              * @var string
              */
-            $type = (string) $filename['type'] ?? '';
+            $type = $filename->type;
 
             return preg_match($pattern, $type);
         });
@@ -236,7 +236,7 @@ trait DLUpload {
      *
      * @param array $files Archivos a ser analizado y procesado.
      * @param boolean $is_multiple Indicar si es múltiple.
-     * @return array
+     * @return array<Filename>
      */
     private function extract_filenames(array $files, bool $is_multiple = true): array {
         /**
@@ -321,7 +321,12 @@ trait DLUpload {
                     $name = $this->replace_to_webp($name);
                 }
 
-                $filenames[] = [
+                /**
+                 * Datos del archivo enviados al servidor
+                 * 
+                 * @var Filename $filename
+                 */
+                $filename = new Filename([
                     "name" => $name,
                     "tmp_name" => $tmp_name,
                     "full_path" => $full_path,
@@ -331,10 +336,11 @@ trait DLUpload {
                     "readable_size" => $readable_size,
                     "error" => $error,
                     "basedir" =>  $this->basedir,
-                    "target" => "{$basedir}/{$name}",
                     "relative_path" => $this->get_relative_basedir(),
-                    "relative_thumbnail_path" => $this->get_relative_basedir() . "/thumbnail",
-                ];
+                    "relative_path_thumbnail" => $this->get_relative_basedir() . "/thumbnail",
+                ]);
+
+                $filenames[] = $filename;
             }
 
             return $filenames;
@@ -409,7 +415,12 @@ trait DLUpload {
             $name = $this->replace_to_webp($name);
         }
 
-        $filenames[] = [
+        /**
+         * Datos del archivo enviados al servidor
+         * 
+         * @var Filename $filename
+         */
+        $filename = new Filename([
             "name" => $name,
             "tmp_name" => $tmp_name,
             "full_path" => $full_path,
@@ -418,11 +429,13 @@ trait DLUpload {
             "size" => $size,
             "readable_size" => $readable_size,
             "error" => $error,
-            "basedir" => $this->basedir,
+            "basedir" =>  $this->basedir,
             "target" => "{$basedir}/{$name}",
             "relative_path" => $this->get_relative_basedir(),
-            "relative_thumbnail_path" => $this->get_relative_basedir() . "/thumbnail",
-        ];
+            "relative_path_thumbnail" => $this->get_relative_basedir() . "/thumbnail",
+        ]);
+
+        $filenames[] = $filename;
 
         return $filenames;
     }
@@ -849,7 +862,7 @@ trait DLUpload {
              */
             $filename = array_pop($route_parts_thumbnail);
 
-            $file->relative_thumbnail = "{$file->relative_thumbnail_path}/{$filename}";
+            $file->relative_thumbnail = "{$file->relative_path_thumbnail}/{$filename}";
         }
     }
 
@@ -1041,7 +1054,7 @@ trait DLUpload {
 
         $mime_type = trim($mime_type);
         $mime_type = strtolower($mime_type);
-        
+
         /**
          * Tipos mimes disponibles en WebP
          * 
@@ -1452,15 +1465,6 @@ trait DLUpload {
      */
     private function get_relative_basedir(): string {
         /**
-         * Partes de una ruta base.
-         * 
-         * @var string[]
-         */
-        $route_parts = explode("/", $this->basedir);
-
-        array_shift($route_parts);
-
-        /**
          * Devuelve la ruta de directorio en función de la fecha.
          * 
          * @var string
@@ -1468,12 +1472,12 @@ trait DLUpload {
         $dir_by_date = $this->get_dir_by_date();
 
         /**
-         * Directorio base relativo.
+         * Ruta relativa del directorio de archivo
          * 
-         * @var string
+         * @var string $relative_path
          */
-        $relative_basedir = join("/", $route_parts) . "/{$dir_by_date}";
+        $relative_path = "{$this->basedir}/{$dir_by_date}";
 
-        return RouteDebugger::trim_slash($relative_basedir);
+        return RouteDebugger::trim_slash($relative_path);
     }
 }
