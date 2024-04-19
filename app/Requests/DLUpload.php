@@ -800,69 +800,30 @@ trait DLUpload {
      * Mueve los archivos previamente subidos en `/tmp/` al directorio de
      * archivos subidos de la aplicación.
      *
-     * @param array $filenames
+     * @param array<Filename> $filenames
      * @return void
      */
     private function move_uploaded(array &$filenames): void {
 
         foreach ($filenames as &$file) {
-            if (!is_array($file)) {
+            if (!($file instanceof Filename)) {
                 continue;
             }
 
-            $file = (object) $file;
-
-            move_uploaded_file($file->tmp_name, $file->target);
-
-            /**
-             * Ruta de la vista en miniatura de la imagen original si la vista
-             * en miniatura se ha creaddo, caso contrario, valdrá null.
-             * 
-             * @var string|null
-             */
-            $thumbnail = $this->resize_image($file->target, $file->type);
-
-            if (is_null($thumbnail)) {
-                continue;
-            }
+            move_uploaded_file($file->tmp_name, $file->get_absolute_path($file->target_file));
 
             /**
              * Imagen en formato WebP
              * 
              * @var string | null $image_file
              */
-            $image_file = $this->format_image($file->target, $file->type);
+            $image_file = $this->format_image($file->target_file, $file->type);
 
             if (is_null($image_file)) {
                 continue;
             }
 
-            $file->target = $image_file;
-            $file->thumbnail = $thumbnail;
-
-            /**
-             * Partes de la ruta relativa de la imagen en miniatura.
-             * 
-             * @var string[]
-             */
-            $route_parts_thumbnail = [];
-
-            $file->relative_thumbnail = null;
-
-            if (is_null($thumbnail)) {
-                continue;
-            }
-
-            $route_parts_thumbnail = explode("/", $thumbnail);
-
-            /**
-             * Nombre del archivo `thumbnail`.
-             * 
-             * @var string
-             */
-            $filename = array_pop($route_parts_thumbnail);
-
-            $file->relative_thumbnail = "{$file->relative_path_thumbnail}/{$filename}";
+            $file->target_file = $image_file;
         }
     }
 

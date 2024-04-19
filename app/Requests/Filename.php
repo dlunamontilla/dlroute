@@ -3,6 +3,8 @@
 namespace DLRoute\Requests;
 
 use DLRoute\Server\DLServer;
+use Imagine\Gd\Imagine;
+use Imagine\Image\Box;
 
 /**
  * MIT License
@@ -51,7 +53,7 @@ final class Filename {
      *
      * @var string $target_file
      */
-    public readonly string $target_file;
+    public string $target_file;
 
     /**
      * Nombre temporal del archivo al momento de subir
@@ -138,6 +140,20 @@ final class Filename {
     public readonly string $relative_path_thumbnail;
 
     /**
+     * Vista previa de la imagen
+     *
+     * @var string $thumbnail
+     */
+    public readonly string $thumbnail;
+
+    /**
+     * Anchura predeterminada
+     *
+     * @var integer $preview_width
+     */
+    public int $preview_width = 500;
+
+    /**
      * Ruta absoluta de la vista previa
      *
      * @var string $absolute_path_thumbnail
@@ -164,6 +180,9 @@ final class Filename {
         $this->absolute_path = $this->get_absolute_path($this->relative_path);
         $this->absolute_path_thumbnail = $this->get_absolute_path($this->relative_path_thumbnail);
         $this->absolute_basedir = $this->get_absolute_path($this->basedir);
+
+        ## VISTA PREVIA DE IMAGEN EN EL CASO DE QUE APLIQUE
+        $this->thumbnail = $this->to_webp($this->target_file, $this->preview_width);
     }
 
     /**
@@ -206,7 +225,7 @@ final class Filename {
      * @param string|null $path Ruta relativa
      * @return string
      */
-    private function get_absolute_path(?string $path): string {
+    public function get_absolute_path(?string $path): string {
 
         if (is_null($path)) {
             $path = "";
@@ -227,5 +246,223 @@ final class Filename {
         $absolute_path = "{$root}/{$path}";
 
         return $this->get_path($absolute_path);
+    }
+
+    /**
+     * Convierte cualquier imagena formato WebP
+     *
+     * @param string $filename Archivo a ser procesado
+     * @param integer|null $preview_width Vista previa del archivo
+     * @return string
+     */
+    protected function to_webp(string $filename, int $preview_width = null): string {
+
+        $filename = $this->get_path($filename);
+
+        if (!($this->is_image($filename))) {
+            return "";
+        }
+
+        /**
+         * Patrón de búsqueda del directorio de la imagen
+         * 
+         * @var string $dir_pattern
+         */
+        $dir_pattern = "(.*)\/[0-9]{4}\/[0-9]{2}\/+";
+
+        /**
+         * Patrón de directorio para Windows
+         * 
+         * @var string $dir_pattern_win
+         */
+        $dir_pattern_win = "(.*)\\\[0-9]{4}\\\[0-9]{2}\\\+";
+
+        /**
+         * Directorio de la vista previa
+         * 
+         * @var string $thumbnail
+         */
+        $thumbnail = "";
+
+        if (!file_exists($this->absolute_path_thumbnail)) {
+            mkdir($this->absolute_path_thumbnail, 0775, true);
+        }
+
+        /**
+         * Capturar el directorio base
+         * 
+         * @var string $basedir
+         */
+        $basedir = "";
+
+        if (!is_null($filename)) {
+
+            /**
+             * Indica si se ha encontrado un patrón o no
+             * 
+             * @var int|false $found
+             */
+            $found = preg_match("/{$dir_pattern}|{$dir_pattern_win}/", $filename, $matches);
+
+            if ($found) {
+                $basedir = $matches[0];
+                $thumbnail = "{$basedir}thumbnail/";
+            }
+        }
+
+
+        /**
+         * Nueva ruta en el caso de que aplique
+         * 
+         * @var string $new_filename
+         */
+        $new_filename = $filename;
+
+        if (!file_exists($filename)) {
+            $new_filename = $this->get_absolute_path($filename);
+        }
+
+        $new_filename = $this->get_path($new_filename);
+
+        if (!file_exists($new_filename)) {
+            header("content-type: application/json; charset=utf-8", 404);
+
+            echo DLOutput::get_json([
+                "status" => false,
+                "error" => "El archivo no existe {$new_filename}"
+            ]);
+
+            exit;
+        }
+
+        /**
+         * Devuelve las dimensiones de la imagen
+         * 
+         * @var array|false $size
+         */
+        $size = getimagesize($new_filename);
+
+        if (!((bool) $size)) {
+            header("content-type: application/json; charset=utf-8", 400);
+
+            DLOutput::get_json([
+                "status" => false,
+                "error" => "formato de imagen inválido"
+            ]);
+
+            exit;
+        }
+
+        /**
+         * Anchura de la imagen
+         * 
+         * @var integer $width
+         */
+        $width = (int) ($size[0] ?? 0);
+
+        /**
+         * Altura de la imagen
+         * 
+         * @var integer $height
+         */
+        $height = (int) ($size[1] ?? 0);
+
+        /**
+         * Relación de aspecto
+         * 
+         * @var double $aspect_radio
+         */
+        $aspect_radio = $height / $width;
+
+        if ($width > 1920) {
+            $width = 1920;
+        }
+
+        /**
+         * Nueva anchura
+         * 
+         * @var integer $new_width
+         */
+        $new_width = is_null($preview_width) ? $width : $preview_width;
+
+        /**
+         * @var integer|float $new_height
+         */
+        $new_height = $new_width * $aspect_radio;
+
+        /**
+         * Encuentra la extensión del archivo
+         * 
+         * @var string $pattern
+         */
+        $pattern = "/\.[^.]+$/";
+
+        /**
+         * Ruta donde se desea guardar la imagen convertida en WebP
+         * 
+         * @var string $output
+         */
+        $output = trim($new_filename);
+        $output = preg_replace($pattern, '', $output);
+        $output = "{$output}.webp";
+
+        if (!file_exists($output)) {
+            header("content-type: application/json; charset=utf-8", 404);
+
+            echo DLOutput::get_json([
+                "status" => false,
+                "error" => "El archivo no existe {$output}"
+            ]);
+
+            exit;
+        }
+
+        /**
+         * @var Imagine $imagine
+         */
+        $imagine = new Imagine();
+
+        $image = $imagine->open($new_filename);
+
+        $image->resize(new Box($new_width, $new_height));
+
+        if (!is_null($preview_width)) {
+            $output = str_replace($basedir, $thumbnail, $output);
+        }
+
+        $image->save($output, [
+            'format' => 'webp',
+            'quality' => 100,
+        ]);
+
+        return $output;
+    }
+
+    /**
+     * Establece la anchura de la imagen que se usará de vista previa
+     *
+     * @param integer $width
+     * @return void
+     */
+    public function set_preview_width(int $width): void {
+        $this->preview_width = $width;
+    }
+
+    /**
+     * Indica si es una imagen o no
+     *
+     * @param string $path
+     * @return boolean
+     */
+    private function is_image(string $path): bool {
+
+        /**
+         * Patrón de búsqueda de imagen
+         * 
+         * @var string $pattern
+         */
+        $pattern = "/image\/(.*?)/";
+
+        return boolval(preg_match($pattern, $this->get_absolute_path($path)));
     }
 }
