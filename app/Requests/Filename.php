@@ -183,9 +183,11 @@ final class Filename {
          * 
          * @var string $pattern_unit
          */
-        $pattern_unit = "/[a-z]+:/";
+        $pattern_unit = "/[a-z]+:/i";
 
         $path = preg_replace($pattern_unit, '', $path);
+
+        $path = "";
 
         /**
          * Patrón de búsqueda de barras diagonales

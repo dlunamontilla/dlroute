@@ -1480,4 +1480,54 @@ trait DLUpload {
 
         return RouteDebugger::trim_slash($relative_path);
     }
+
+    /**
+     * Devuelve la ruta formateada en función del sistema operativo.
+     *
+     * @param string $path Ruta absoluta o relativa al archivo
+     * @return string
+     */
+    protected function get_path(string $path): string {
+
+        /**
+         * Ruta física del archivo
+         * 
+         * @var string $new_path
+         */
+        $new_path = preg_replace('/[a-z]:/i', '', $path);
+        $new_path = preg_replace('/[\/\\\]+/', DIRECTORY_SEPARATOR, $path);
+
+        return trim($new_path);
+    }
+
+    /**
+     * Devuelve la ruta absoluta del archivo
+     *
+     * @return string
+     */
+    protected function get_absolute_path(string $relative_path): string {
+
+        /**
+         * Directorio raíz de la aplicación
+         * 
+         * @var string $root
+         */
+        $root = DLServer::get_document_root();
+
+        /**
+         * Ruta absoluta de la aplicación
+         * 
+         * @var string $path
+         */
+        $path = "{$root}/{$relative_path}";
+
+        /**
+         * Ruta física del archivo
+         * 
+         * @var string $absolute_path
+         */
+        $absolute_path = $this->get_path($path);
+
+        return $absolute_path;
+    }
 }
