@@ -463,6 +463,6 @@ final class Filename {
          */
         $pattern = "/image\/(.*?)/";
 
-        return boolval(preg_match($pattern, $this->get_absolute_path($path)));
+        return boolval(preg_match($pattern, $this->type));
     }
 }
