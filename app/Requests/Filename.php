@@ -187,8 +187,6 @@ final class Filename {
 
         $path = preg_replace($pattern_unit, '', $path);
 
-        $path = "";
-
         /**
          * Patrón de búsqueda de barras diagonales
          * 
