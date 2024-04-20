@@ -1,6 +1,7 @@
 <?php
 
 namespace DLRoute\Test;
+
 use DLRoute\Config\Controller;
 use DLRoute\Server\DLServer;
 
@@ -77,14 +78,21 @@ final class TestController extends Controller {
         ];
     }
 
+    /**
+     * Prueba con el envío de archivos
+     *
+     * @return array
+     */
     public function file(): array {
 
         $this->set_basedir('/storage/uploads');
 
         $filenames = $this->upload_file('file', '*/*');
-        
+
         return [
-            "files" => $filenames
+            "files" => $filenames,
+            "separator" => "----------------------",
+            // "\$_FILES" => $_FILES
         ];
     }
 }

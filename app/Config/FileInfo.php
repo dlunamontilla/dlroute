@@ -25,6 +25,7 @@ class FileInfo implements FileInfoInterface {
         'image/webp',
         'image/avif',
         'image/vnd.microsoft.icon',
+        'image/svg\+xml',
         'image/svg+xml',
     ];
 
@@ -37,7 +38,7 @@ class FileInfo implements FileInfoInterface {
     public static function is_image(string $filename): bool {
         $pattern = "/^image\/(.*?)$/i";
 
-        
+
         /**
          * Tipo de archivo.
          * 

@@ -2,8 +2,10 @@
 
 namespace DLRoute\Requests;
 
+use DLRoute\Config\FileInfo;
 use DLRoute\Routes\RouteDebugger;
 use DLRoute\Server\DLServer;
+use DLRoute\Traits\ImageTrait;
 use finfo;
 use GdImage;
 
@@ -40,6 +42,8 @@ use GdImage;
  * @license MIT
  */
 trait DLUpload {
+
+    use ImageTrait;
 
     /**
      * Nombres de archivos
@@ -80,6 +84,7 @@ trait DLUpload {
          * @var array
          */
         $filenames = $this->get_filenames();
+
         $filenames = $this->filter_by_type($filenames, $type);
 
         $this->move_uploaded($filenames);
@@ -239,6 +244,7 @@ trait DLUpload {
      * @return array<Filename>
      */
     private function extract_filenames(array $files, bool $is_multiple = true): array {
+
         /**
          * Directorio base de archivos.
          * 
@@ -255,6 +261,7 @@ trait DLUpload {
 
         if ($is_multiple) {
             foreach ($files['name'] as $key => $filename) {
+
                 if (!is_string($filename)) {
                     continue;
                 }
@@ -305,19 +312,18 @@ trait DLUpload {
                 /**
                  * Tamaño legible del archivo. Se asignan unidades de tamaños.
                  * 
-                 * @var string
+                 * @var string $readable_size
                  */
                 $readable_size = $this->get_readable_size((int) $size);
 
+                /**
+                 * Nombre formateado del archivo enviado al servidor
+                 * 
+                 * @var string $name
+                 */
                 $name = $this->slug($filename, $type, ['file' => $tmp_name, 'type' => $files['type'][$key] ?? '']);
 
-                if (
-                    $this->is_png($type) ||
-                    $this->is_jpeg($type) ||
-                    $this->is_bitmap($type) ||
-                    $this->is_gif($type) ||
-                    $this->is_webp($type)
-                ) {
+                if ($this->is_bitmap_image($type)) {
                     $name = $this->replace_to_webp($name);
                 }
 
@@ -405,13 +411,7 @@ trait DLUpload {
 
         $name = $this->slug($name, $type, ['file' => $tmp_name, 'type' => $files['type'] ?? '']);
 
-        if (
-            $this->is_png($type) ||
-            $this->is_jpeg($type) ||
-            $this->is_bitmap($type) ||
-            $this->is_gif($type) ||
-            $this->is_webp($type)
-        ) {
+        if ($this->is_bitmap_image($type)) {
             $name = $this->replace_to_webp($name);
         }
 
@@ -806,11 +806,37 @@ trait DLUpload {
     private function move_uploaded(array &$filenames): void {
 
         foreach ($filenames as &$file) {
+
             if (!($file instanceof Filename)) {
                 continue;
             }
 
-            move_uploaded_file($file->tmp_name, $file->get_absolute_path($file->target_file));
+            /**
+             * Ruta absoluta de archivo
+             * 
+             * @var string $absolute_file
+             */
+            $absolute_file = $file->get_absolute_path($file->target_file);
+
+            move_uploaded_file($file->tmp_name, $absolute_file);
+
+            if (!file_exists($absolute_file) || !(FileInfo::is_image($absolute_file))) {
+                $file->set_thumbnail(null);
+                continue;
+            }
+
+            if (!$this->is_bitmap_image($file->type)) {
+                continue;
+            }
+
+            /**
+             * Vista previa de la imagen
+             * 
+             * @var string $preview
+             */
+            $preview = $this->to_webp($file->target_file, $this->preview_width);
+
+            $file->set_thumbnail($preview);
 
             /**
              * Imagen en formato WebP
@@ -956,86 +982,6 @@ trait DLUpload {
     }
 
     /**
-     * Verifica si el archivo es formato SVG
-     *
-     * @param string $mime_type Tipo MIME del gráfico vectorial.
-     * @return boolean
-     */
-    private function is_svg(string $mime_type): bool {
-        return $mime_type === 'image/svg+xml';
-    }
-
-    /**
-     * Verifica si el archivo es una foto JPEG.
-     *
-     * @param string $mime_type Tipo MIME de la foto.
-     * @return boolean
-     */
-    private function is_jpeg(string $mime_type): bool {
-        return $mime_type === "image/jpeg";
-    }
-
-    /**
-     * Verifica si el archivo es una imagen PNG
-     *
-     * @param string $mime_type Tipo MIME de la imagen PNG.
-     * @return boolean
-     */
-    private function is_png(string $mime_type): bool {
-        return $mime_type === "image/png";
-    }
-
-    /**
-     * Verifica si el archivo es una imagen GIF
-     *
-     * @param string $mime_type Tipo MIME del archivo
-     * @return boolean
-     */
-    private function is_gif(string $mime_type): bool {
-        return $mime_type === "image/gif";
-    }
-
-    /**
-     * Verifica si el archivo es una imagen `BMP`.
-     *
-     * @param string $mime_type
-     * @return boolean
-     */
-    private function is_bitmap(string $mime_type): bool {
-        return $mime_type === "image/bmp" || $mime_type === "image/x-ms-bmp";
-    }
-
-    /**
-     * Determina si la imagen enviada es un formato Webp
-     *
-     * @param string $mime_type Tipo MIME de archivo.
-     * @return boolean
-     */
-    private function is_webp(string $mime_type): bool {
-
-        $mime_type = trim($mime_type);
-        $mime_type = strtolower($mime_type);
-
-        /**
-         * Tipos mimes disponibles en WebP
-         * 
-         * @var string[] $mime_types
-         */
-        $mime_types = [
-            'image/webp',
-            'image/x-webp',
-            'image/vnd.google.webp',
-            'image/webp-image',
-            'image/x-webp-image',
-            'image/x-google-webp',
-            'image/google-webp',
-            'image/vnd.webp'
-        ];
-
-        return in_array($mime_type, $mime_types);
-    }
-
-    /**
      * Cambia el formato de la imagen a formato WebP de forma automática.
      *
      * @param string $filename Archivo a ser analizado y procesado.
@@ -1053,7 +999,7 @@ trait DLUpload {
         /**
          * Patrón de búsqueda de formatos de imágenes.
          * 
-         * @var  string
+         * @var  string $pattern
          */
         $pattern = "/^image\/(.*?)$/i";
 
@@ -1488,6 +1434,8 @@ trait DLUpload {
          * @var string $absolute_path
          */
         $absolute_path = $this->get_path($path);
+
+        $absolute_path = rtrim($absolute_path, "\/\\");
 
         return $absolute_path;
     }
