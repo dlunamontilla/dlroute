@@ -282,7 +282,7 @@ class ResourceManager implements ResourceInterface {
          */
         $html = "<picture>
                     <source srcset=\"{$src}\" type=\"{$type}\" title=\"{$title}\">
-                    <img src=\"{$src}\" alt=\"{$title}\" title=\"{$title}\">
+                    <img src=\"{$src}\" alt=\"{$title}\" title=\"{$title}\" loading=\"lazy\">
                 </picture>";
 
         $html = preg_replace("/\s+/", ' ', $html);
