@@ -1389,25 +1389,6 @@ trait DLUpload {
     }
 
     /**
-     * Devuelve la ruta formateada en función del sistema operativo.
-     *
-     * @param string $path Ruta absoluta o relativa al archivo
-     * @return string
-     */
-    protected function get_path(string $path): string {
-
-        /**
-         * Ruta física del archivo
-         * 
-         * @var string $new_path
-         */
-        $new_path = preg_replace('/[a-z]:/i', '', $path);
-        $new_path = preg_replace('/[\/\\\]+/', DIRECTORY_SEPARATOR, $path);
-
-        return trim($new_path);
-    }
-
-    /**
      * Devuelve la ruta absoluta del archivo
      *
      * @return string
