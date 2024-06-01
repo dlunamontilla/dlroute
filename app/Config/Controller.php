@@ -6,6 +6,7 @@ use DLRoute\Requests\DLOutput;
 use DLRoute\Requests\DLRequest;
 use DLRoute\Requests\DLUpload;
 use DLRoute\Server\DLServer;
+use DLRoute\Traits\Request;
 use DLRoute\Validates\DLValidates;
 
 /**
@@ -19,10 +20,9 @@ use DLRoute\Validates\DLValidates;
  * @license MIT
  */
 abstract class Controller {
-    
-    use DLValidates;
-    use DLUpload;
-    
+
+    use DLValidates, DLUpload, Request;
+
     /**
      * Procesa las peticiones del usuario.
      *

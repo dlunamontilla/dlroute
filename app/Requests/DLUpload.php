@@ -71,7 +71,7 @@ trait DLUpload {
      *
      * @param string $field Campo del formulario.
      * @param string $type Indica el tipo de archivo a permitir en el servidor
-     * @return array
+     * @return array<Filename>
      */
     protected function upload_file(string $field, string $type = "*/*"): array {
         $field = trim($field);

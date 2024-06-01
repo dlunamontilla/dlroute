@@ -3,6 +3,8 @@
 namespace DLRoute\Test;
 
 use DLRoute\Config\Controller;
+use DLRoute\Requests\HeadersInit;
+use DLRoute\Requests\RequestInit;
 use DLRoute\Server\DLServer;
 
 /**

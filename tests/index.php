@@ -22,7 +22,7 @@ DLRoute::post('/regex/{parametro}', [TestController::class, 'index'])->filter_by
     "parametro" => '/^[0-9]+$/'
 ]);
 
-DLRoute::post('/test/{parametro}', function(object $params) {
+DLRoute::post('/test/{parametro}', function (object $params) {
     return $params;
 })->filter_by_type([
     "parametro" => "numeric"
@@ -32,7 +32,7 @@ DLRoute::get('/test/{file}', [TestController::class, 'index']);
 
 DLRoute::get('/server', [TestController::class, 'server']);
 
-DLRoute::post('/ciencia/{parametro1}/ciencia/{parametro2}', function(object $params) {
+DLRoute::post('/ciencia/{parametro1}/ciencia/{parametro2}', function (object $params) {
     return DLRoute::get_routes();
 });
 
