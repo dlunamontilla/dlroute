@@ -130,7 +130,7 @@ class DLServer implements ServerInterface {
      * @return string|null
      */
     public static function get_server_software(): ?string {
-        
+
         /**
          * Software del servidor
          * 
@@ -175,7 +175,7 @@ class DLServer implements ServerInterface {
         if ($relative_route === "/") {
             $relative_route = "";
         }
-        
+
         /**
          * Ruta virtual.
          * 
@@ -189,7 +189,7 @@ class DLServer implements ServerInterface {
         if (empty($virtual_route)) {
             $virtual_route .= "/";
         }
-        
+
         return $virtual_route;
     }
 
@@ -258,7 +258,7 @@ class DLServer implements ServerInterface {
          * @var string
          */
         $base_url = self::get_base_url();
-        
+
         $base_url = rtrim($base_url, "\/");
         $base_url = trim($base_url);
 
@@ -275,7 +275,7 @@ class DLServer implements ServerInterface {
      * @return string
      */
     private static function get_protocol(): string {
-        $is_https = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
+        $is_https = DLHost::is_https();
 
         $protocol = "http://";
 

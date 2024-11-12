@@ -240,11 +240,12 @@ class ResourceManager implements ResourceInterface {
      * 
      * Ejemplo de uso:
      * 
-     * ```
+     * ```php
+     * <?php
      *  $image = self::get_image([
-     *  "title" => $title,
-     *  "type" => $type,
-     *  "src" => $src
+     *     "title" => $title,
+     *     "type" => $type,
+     *     "src" => $src
      * ]);
      * ```
      *
