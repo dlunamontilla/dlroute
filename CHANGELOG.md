@@ -14,9 +14,18 @@
 ## Modified
 
 - **DLServer Class**:
+
   - Se actualizó el método `get_protocol()` para usar el nuevo método `DLHost::is_https()` y determinar el protocolo en uso (`http` o `https`), mejorando así la detección de HTTPS en entornos con proxies y balanceadores.
+
+- **DLUpload Trait**:
+  - Se cambiaron los métodos de protegidos a públicos para permitir un acceso más flexible:
+    - `upload_file(string $field, string $type = "*/*"): array`: Maneja la carga de archivos en el servidor.
+    - `get_filenames(): array`: Devuelve los nombres de los archivos cargados.
+    - `set_basedir(string $basedir): void`: Establece el directorio base para los archivos cargados.
+    - `set_thumbnail_width(int $width): void`: Configura la anchura de los thumbnails.
+    - `get_absolute_path(string $relative_path): string`: Devuelve la ruta absoluta de un archivo dado su ruta relativa.
 
 ## Documentation
 
 - Añadida documentación PHPDoc para cada método de `DLHost` y `DLServer` que detalla el propósito de cada método y sus retornos esperados.
-  
+- Documentados los métodos de `DLUpload` reflejando el cambio en su nivel de acceso.
