@@ -73,7 +73,7 @@ trait DLUpload {
      * @param string $type Indica el tipo de archivo a permitir en el servidor
      * @return array<Filename>
      */
-    protected function upload_file(string $field, string $type = "*/*"): array {
+    public function upload_file(string $field, string $type = "*/*"): array {
         $field = trim($field);
 
         $this->load_filenames($field);
@@ -97,7 +97,7 @@ trait DLUpload {
      *
      * @return array
      */
-    protected function get_filenames(): array {
+    public function get_filenames(): array {
         return $this->filenames;
     }
 
@@ -107,7 +107,7 @@ trait DLUpload {
      * @param string $basedir Directorio base a establecer.
      * @return void
      */
-    protected function set_basedir(string $basedir): void {
+    public function set_basedir(string $basedir): void {
         $this->basedir = RouteDebugger::clear_route($basedir);
     }
 
@@ -118,7 +118,7 @@ trait DLUpload {
      * @param integer $width Anchura de los `thumbnails`.
      * @return void
      */
-    protected function set_thumbnail_width(int $width): void {
+    public function set_thumbnail_width(int $width): void {
         $this->thumbnail_width = $width;
     }
 
@@ -1393,7 +1393,7 @@ trait DLUpload {
      *
      * @return string
      */
-    protected function get_absolute_path(string $relative_path): string {
+    public function get_absolute_path(string $relative_path): string {
 
         /**
          * Directorio raíz de la aplicación
